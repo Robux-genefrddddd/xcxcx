@@ -315,7 +315,7 @@ export function AdminKeyManagement({
             return (
               <div
                 key={key.id}
-                className="p-5 rounded-xl border transition-all duration-300 hover:shadow-lg transform hover:scale-105 group"
+                className="p-5 rounded-lg border transition-colors group"
                 style={{
                   backgroundColor: colors.card,
                   borderColor: colors.border,
