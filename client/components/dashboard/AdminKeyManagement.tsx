@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { UserRole, canCreateKeys } from "@/lib/auth-utils";
+import { sanitizeFirestoreQuery, sanitizeInput } from "@/lib/input-validation";
 import { PremiumKeyData } from "@shared/api";
 
 interface PremiumKey extends PremiumKeyData {
