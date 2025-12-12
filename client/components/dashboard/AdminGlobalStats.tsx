@@ -192,77 +192,126 @@ export function AdminGlobalStats({ theme, userRole }: AdminGlobalStatsProps) {
       ) : (
         <>
           {/* Key Metrics */}
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
-              className="p-4 rounded-xl border"
+              className="p-6 rounded-xl border transition-all hover:shadow-lg transform hover:scale-105 group"
               style={{
                 backgroundColor: colors.card,
                 borderColor: colors.border,
               }}
             >
-              <p style={{ color: colors.textSecondary }} className="text-sm">
-                Total Users
-              </p>
-              <p
-                className="text-2xl font-bold mt-2"
-                style={{ color: colors.accent }}
-              >
-                {stats.totalUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p style={{ color: colors.textSecondary }} className="text-xs uppercase tracking-wide">
+                    Total Users
+                  </p>
+                  <p
+                    className="text-4xl font-bold mt-3"
+                    style={{ color: colors.accent }}
+                  >
+                    {stats.totalUsers}
+                  </p>
+                </div>
+                <div
+                  className="p-3 rounded-lg text-2xl"
+                  style={{ backgroundColor: colors.accentLight }}
+                >
+                  👥
+                </div>
+              </div>
             </div>
             <div
-              className="p-4 rounded-xl border"
+              className="p-6 rounded-xl border transition-all hover:shadow-lg transform hover:scale-105 group"
               style={{
                 backgroundColor: colors.card,
                 borderColor: colors.border,
               }}
             >
-              <p style={{ color: colors.textSecondary }} className="text-sm">
-                Active Users
-              </p>
-              <p
-                className="text-2xl font-bold mt-2"
-                style={{ color: "#22C55E" }}
-              >
-                {stats.activeUsers}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p style={{ color: colors.textSecondary }} className="text-xs uppercase tracking-wide">
+                    Active Users
+                  </p>
+                  <p
+                    className="text-4xl font-bold mt-3"
+                    style={{ color: "#22C55E" }}
+                  >
+                    {stats.activeUsers}
+                  </p>
+                </div>
+                <div
+                  className="p-3 rounded-lg text-2xl"
+                  style={{ backgroundColor: "rgba(34, 197, 94, 0.15)" }}
+                >
+                  🟢
+                </div>
+              </div>
+              <div style={{ color: colors.textSecondary }} className="text-xs mt-3">
+                {Math.round((stats.activeUsers / stats.totalUsers) * 100)}% of total
+              </div>
             </div>
             <div
-              className="p-4 rounded-xl border"
+              className="p-6 rounded-xl border transition-all hover:shadow-lg transform hover:scale-105 group"
               style={{
                 backgroundColor: colors.card,
                 borderColor: colors.border,
               }}
             >
-              <p style={{ color: colors.textSecondary }} className="text-sm">
-                Total Storage
-              </p>
-              <p
-                className="text-2xl font-bold mt-2"
-                style={{ color: "#A855F7" }}
-              >
-                {formatStorage(stats.totalStorage)}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p style={{ color: colors.textSecondary }} className="text-xs uppercase tracking-wide">
+                    Total Storage
+                  </p>
+                  <p
+                    className="text-3xl font-bold mt-3"
+                    style={{ color: "#A855F7" }}
+                  >
+                    {formatStorage(stats.totalStorage)}
+                  </p>
+                </div>
+                <div
+                  className="p-3 rounded-lg text-2xl"
+                  style={{ backgroundColor: "rgba(168, 85, 247, 0.15)" }}
+                >
+                  💾
+                </div>
+              </div>
             </div>
             <div
-              className="p-4 rounded-xl border"
+              className="p-6 rounded-xl border transition-all hover:shadow-lg transform hover:scale-105 group"
               style={{
                 backgroundColor: colors.card,
                 borderColor: colors.border,
               }}
             >
-              <p style={{ color: colors.textSecondary }} className="text-sm">
-                Premium Users
-              </p>
-              <p
-                className="text-2xl font-bold mt-2"
-                style={{ color: "#F59E0B" }}
-              >
-                {stats.planDistribution.reduce(
+              <div className="flex items-center justify-between">
+                <div>
+                  <p style={{ color: colors.textSecondary }} className="text-xs uppercase tracking-wide">
+                    Premium Users
+                  </p>
+                  <p
+                    className="text-4xl font-bold mt-3"
+                    style={{ color: "#F59E0B" }}
+                  >
+                    {stats.planDistribution.reduce(
+                      (acc, p) => acc + (p.name !== "Free" ? p.value : 0),
+                      0,
+                    )}
+                  </p>
+                </div>
+                <div
+                  className="p-3 rounded-lg text-2xl"
+                  style={{ backgroundColor: "rgba(245, 158, 11, 0.15)" }}
+                >
+                  ⭐
+                </div>
+              </div>
+              <div style={{ color: colors.textSecondary }} className="text-xs mt-3">
+                {Math.round((stats.planDistribution.reduce(
                   (acc, p) => acc + (p.name !== "Free" ? p.value : 0),
                   0,
-                )}
-              </p>
+                ) / stats.totalUsers) * 100)}% premium rate
+              </div>
             </div>
           </div>
 
