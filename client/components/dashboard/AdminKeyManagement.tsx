@@ -482,7 +482,7 @@ export function AdminKeyManagement({
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div
-          className="p-5 rounded-xl border transition-all hover:shadow-lg"
+          className="p-5 rounded-lg border transition-colors"
           style={{
             backgroundColor: colors.card,
             borderColor: colors.border,
