@@ -6,6 +6,7 @@ interface FileUploadProps {
   onFileSelected: (file: File) => void;
   uploading: boolean;
   theme: string;
+  maxFileSize?: number; // in MB
 }
 
 export function FileUpload({
