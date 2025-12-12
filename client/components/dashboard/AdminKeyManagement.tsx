@@ -205,7 +205,7 @@ export function AdminKeyManagement({
       {/* Generate Key Form */}
       {showGenerateForm && canCreateKeys(userRole) && (
         <div
-          className="p-6 rounded-xl border space-y-4 animate-fadeIn"
+          className="p-6 rounded-lg border space-y-4"
           style={{
             backgroundColor: colors.card,
             borderColor: colors.border,
@@ -274,7 +274,7 @@ export function AdminKeyManagement({
           <button
             onClick={generateKey}
             disabled={generatingKey}
-            className="w-full px-4 py-3 rounded-lg font-medium transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+            className="w-full px-4 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundColor: colors.accent,
               color: "#FFFFFF",
