@@ -146,9 +146,9 @@ export function AdminUserManagement({
 
   const getRoleInfo = (role: UserRole) => {
     const roleMap = {
-      founder: { emoji: "👑", label: "Founder", color: "#22C55E" },
-      admin: { emoji: "🔐", label: "Admin", color: colors.primary },
-      user: { emoji: "👤", label: "User", color: colors.textSecondary },
+      founder: { label: "Founder", color: "#22C55E" },
+      admin: { label: "Admin", color: colors.primary },
+      user: { label: "User", color: colors.textSecondary },
     };
     return roleMap[role] || roleMap.user;
   };
@@ -156,13 +156,12 @@ export function AdminUserManagement({
   const getPlanInfo = (plan: string) => {
     const planMap = {
       lifetime: {
-        emoji: "♾️",
         label: "Lifetime",
         color: "#A855F7",
         icon: Award,
       },
-      premium: { emoji: "⭐", label: "Premium", color: "#22C55E", icon: Zap },
-      free: { emoji: "🎯", label: "Free", color: colors.primary, icon: User },
+      premium: { label: "Premium", color: "#22C55E", icon: Zap },
+      free: { label: "Free", color: colors.primary, icon: User },
     };
     return planMap[plan as keyof typeof planMap] || planMap.free;
   };
@@ -172,7 +171,7 @@ export function AdminUserManagement({
       {/* Header */}
       <div>
         <h3 className="text-xl font-bold" style={{ color: colors.text }}>
-          👥 User Management
+          User Management
         </h3>
         <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
           Manage user roles, plans, and permissions
@@ -259,7 +258,6 @@ export function AdminUserManagement({
                       color: roleInfo.color,
                     }}
                   >
-                    <span>{roleInfo.emoji}</span>
                     <span>{roleInfo.label}</span>
                   </div>
 
@@ -276,7 +274,6 @@ export function AdminUserManagement({
                       color: planInfo.color,
                     }}
                   >
-                    <span>{planInfo.emoji}</span>
                     <span>{planInfo.label}</span>
                   </div>
                 </div>
@@ -329,9 +326,9 @@ export function AdminUserManagement({
                         color: colors.text,
                       }}
                     >
-                      <option value="user">👤 User</option>
-                      <option value="admin">🔐 Admin</option>
-                      <option value="founder">👑 Founder</option>
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                      <option value="founder">Founder</option>
                     </select>
                   </div>
                 )}
@@ -351,7 +348,7 @@ export function AdminUserManagement({
                               color: "#EF4444",
                             }}
                           >
-                            ⚠️ Confirm
+                            Confirm
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(null)}
