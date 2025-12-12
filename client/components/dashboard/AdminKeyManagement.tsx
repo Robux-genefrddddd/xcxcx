@@ -438,7 +438,7 @@ export function AdminKeyManagement({
                       <div className="flex gap-2">
                         <button
                         onClick={() => deleteKey(key.id, key)}
-                        className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105"
+                        className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
                         style={{
                           backgroundColor: "rgba(239, 68, 68, 0.2)",
                           color: "#EF4444",
@@ -446,21 +446,21 @@ export function AdminKeyManagement({
                       >
                         Confirm Delete
                       </button>
-                        <button
-                          onClick={() => setDeleteConfirm(null)}
-                          className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all"
-                          style={{
-                            backgroundColor: colors.sidebar,
-                            color: colors.textSecondary,
-                          }}
-                        >
-                          Cancel
-                        </button>
+                      <button
+                        onClick={() => setDeleteConfirm(null)}
+                        className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        style={{
+                          backgroundColor: colors.sidebar,
+                          color: colors.textSecondary,
+                        }}
+                      >
+                        Cancel
+                      </button>
                       </div>
                     ) : (
                       <button
                         onClick={() => setDeleteConfirm(key.id)}
-                        className="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 opacity-70 hover:opacity-100"
+                        className="w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 opacity-70 hover:opacity-100"
                         style={{
                           backgroundColor: "rgba(239, 68, 68, 0.1)",
                           color: "#EF4444",
