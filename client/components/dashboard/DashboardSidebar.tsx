@@ -128,9 +128,11 @@ export function DashboardSidebar({
                   alt={item.label}
                   className="w-4 h-4 object-contain"
                   style={{
-                    filter: isActive
-                      ? "brightness(1) invert(1)"
-                      : "brightness(1.5) invert(1) opacity(0.9)",
+                    filter: item.id === "files"
+                      ? "none"
+                      : isActive
+                        ? "brightness(1) invert(1)"
+                        : "brightness(1.5) invert(1) opacity(0.9)",
                   }}
                 />
               ) : (
