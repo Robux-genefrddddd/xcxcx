@@ -1,10 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Plus,
-  Copy,
-  Trash2,
-  Check,
-} from "lucide-react";
+import { Plus, Copy, Trash2, Check } from "lucide-react";
 import { getThemeColors } from "@/lib/theme-colors";
 import {
   collection,
@@ -164,7 +159,6 @@ export function AdminKeyManagement({
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
-
 
   return (
     <div className="space-y-6">
@@ -422,25 +416,25 @@ export function AdminKeyManagement({
                     {deleteConfirm === key.id ? (
                       <div className="flex gap-2">
                         <button
-                        onClick={() => deleteKey(key.id, key)}
-                        className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        style={{
-                          backgroundColor: "rgba(239, 68, 68, 0.2)",
-                          color: "#EF4444",
-                        }}
-                      >
-                        Confirm Delete
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirm(null)}
-                        className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        style={{
-                          backgroundColor: colors.sidebar,
-                          color: colors.textSecondary,
-                        }}
-                      >
-                        Cancel
-                      </button>
+                          onClick={() => deleteKey(key.id, key)}
+                          className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                          style={{
+                            backgroundColor: "rgba(239, 68, 68, 0.2)",
+                            color: "#EF4444",
+                          }}
+                        >
+                          Confirm Delete
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(null)}
+                          className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                          style={{
+                            backgroundColor: colors.sidebar,
+                            color: colors.textSecondary,
+                          }}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     ) : (
                       <button

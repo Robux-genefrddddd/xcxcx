@@ -70,5 +70,7 @@ export function isValidUserData(user: any): boolean {
   if (!user || typeof user !== "object") return false;
 
   const { email, uid } = user;
-  return typeof email === "string" && typeof uid === "string" && isValidEmail(email);
+  return (
+    typeof email === "string" && typeof uid === "string" && isValidEmail(email)
+  );
 }

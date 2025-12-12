@@ -33,7 +33,10 @@ export async function getUserRole(userId: string): Promise<UserRole> {
       return "user";
     } else {
       // Initialize new user with "user" role
-      await setDoc(userDocRef, { role: "user", createdAt: new Date().toISOString() });
+      await setDoc(userDocRef, {
+        role: "user",
+        createdAt: new Date().toISOString(),
+      });
       return "user";
     }
   } catch (error) {

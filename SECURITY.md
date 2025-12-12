@@ -44,6 +44,7 @@ Provides utilities for:
 ### 2. Firebase Injection Prevention
 
 When writing to Firestore:
+
 - All string inputs are sanitized before database operations
 - Numeric inputs are clamped to valid ranges
 - User IDs are sanitized before storage
