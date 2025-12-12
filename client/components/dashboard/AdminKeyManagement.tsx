@@ -337,37 +337,29 @@ export function AdminKeyManagement({
                 }}
               >
                 {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
                     <div
-                      className="p-2 rounded-lg"
-                      style={{ backgroundColor: getTypeBgColor(key.type) }}
+                      className="text-xs uppercase tracking-wide font-medium"
+                      style={{ color: colors.textSecondary }}
                     >
-                      {getTypeIcon(key.type)}
+                      {key.type === "lifetime"
+                        ? "Lifetime"
+                        : key.type === "yearly"
+                          ? "Yearly"
+                          : "Monthly"}
                     </div>
-                    <div>
-                      <div
-                        className="text-xs uppercase tracking-wide"
-                        style={{ color: colors.textSecondary }}
-                      >
-                        {key.type === "lifetime"
-                          ? "Lifetime"
-                          : key.type === "yearly"
-                            ? "Yearly"
-                            : "Monthly"}
-                      </div>
-                      <div
-                        className="text-sm font-semibold mt-1"
-                        style={{ color: colors.text }}
-                      >
-                        {key.maxEmojis.toLocaleString()} Emojis
-                      </div>
+                    <div
+                      className="text-lg font-semibold mt-1"
+                      style={{ color: colors.text }}
+                    >
+                      {key.maxEmojis.toLocaleString()}
                     </div>
                   </div>
 
                   {/* Status Badge */}
                   <div
-                    className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
+                    className="px-2 py-1 rounded text-xs font-medium"
                     style={{
                       backgroundColor: isUsed
                         ? "rgba(34, 197, 94, 0.15)"
@@ -375,7 +367,7 @@ export function AdminKeyManagement({
                       color: isUsed ? "#22C55E" : colors.primary,
                     }}
                   >
-                    {isUsed ? "✓ Used" : "○ Unused"}
+                    {isUsed ? "Used" : "Unused"}
                   </div>
                 </div>
 
