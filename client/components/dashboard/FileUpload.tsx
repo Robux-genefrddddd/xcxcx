@@ -119,7 +119,7 @@ export function FileUpload({
             color: colors.textSecondary,
           }}
         >
-          Maximum file size: 100 MB
+          Maximum file size: {maxFileSize} MB
         </p>
       </div>
     </div>
