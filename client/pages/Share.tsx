@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { db, storage } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { ref, getBytes } from "firebase/storage";
+import { ref, getDownloadURL } from "firebase/storage";
 
 interface SharedFile {
   id: string;
@@ -108,15 +108,14 @@ export default function Share() {
 
       if (fileData?.storagePath) {
         const storageRef = ref(storage, fileData.storagePath);
-        const bytes = await getBytes(storageRef);
-        const blob = new Blob([bytes]);
-        const url = window.URL.createObjectURL(blob);
+        const downloadUrl = await getDownloadURL(storageRef);
+
         const a = document.createElement("a");
-        a.href = url;
+        a.href = downloadUrl;
         a.download = file.name;
+        a.style.display = "none";
         document.body.appendChild(a);
         a.click();
-        window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       }
     } catch (err) {
