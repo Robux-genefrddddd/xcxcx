@@ -82,6 +82,19 @@ export default function Share() {
         sharePassword: fileData.sharePassword,
       });
 
+      // Track unique view
+      const sessionId = getOrCreateSessionId();
+      if (!fileData.viewedBy || !fileData.viewedBy.includes(sessionId)) {
+        try {
+          await updateDoc(fileRef, {
+            viewedBy: arrayUnion(sessionId),
+            viewCount: (fileData.viewCount || 0) + 1,
+          });
+        } catch (error) {
+          console.error("Error tracking view:", error);
+        }
+      }
+
       // Check if file is password protected
       if (fileData.sharePassword) {
         setIsPasswordProtected(true);
