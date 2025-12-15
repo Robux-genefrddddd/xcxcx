@@ -131,6 +131,39 @@ export function FilesList({
     }
   };
 
+  const toggleFileSelection = (fileId: string) => {
+    const newSelected = new Set(selectedFileIds);
+    if (newSelected.has(fileId)) {
+      newSelected.delete(fileId);
+    } else {
+      newSelected.add(fileId);
+    }
+    setSelectedFileIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedFileIds.size === files.length) {
+      setSelectedFileIds(new Set());
+    } else {
+      setSelectedFileIds(new Set(files.map((f) => f.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    for (const fileId of selectedFileIds) {
+      await onDelete(fileId);
+    }
+    setSelectedFileIds(new Set());
+    setDeleteConfirmBulk(false);
+  };
+
+  const handleBulkShare = () => {
+    for (const fileId of selectedFileIds) {
+      onShare(fileId);
+    }
+    setSelectedFileIds(new Set());
+  };
+
   return (
     <div
       className="rounded-2xl border overflow-hidden"
