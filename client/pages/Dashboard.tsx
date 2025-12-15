@@ -437,6 +437,33 @@ export default function Dashboard() {
     usersUnsubscribeRef.current = unsubscribe;
   };
 
+  // ============= PLAN LISTENER =============
+  const setupPlanListener = (userId: string) => {
+    if (!userId) return;
+
+    // Unsubscribe from previous listener if exists
+    if (planUnsubscribeRef.current) {
+      planUnsubscribeRef.current();
+    }
+
+    const planRef = doc(db, "userPlans", userId);
+
+    // Set up real-time listener for plan changes
+    const unsubscribe = onSnapshot(
+      planRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setUserPlan(snapshot.data() as UserPlan);
+        }
+      },
+      (error) => {
+        console.error("Error listening to plan changes:", error);
+      },
+    );
+
+    planUnsubscribeRef.current = unsubscribe;
+  };
+
   const handleAddUser = async (
     name: string,
     email: string,
