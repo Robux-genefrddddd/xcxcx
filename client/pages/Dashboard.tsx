@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FileUpload } from "@/components/dashboard/FileUpload";
 import { FilesList } from "@/components/dashboard/FilesList";
@@ -25,6 +25,7 @@ import {
   where,
   getDoc,
   setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { ref, uploadBytes, deleteObject } from "firebase/storage";
 import { onAuthStateChanged } from "firebase/auth";
@@ -82,6 +83,8 @@ export default function Dashboard() {
     storageUsed: 0,
   });
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const filesUnsubscribeRef = useRef<(() => void) | null>(null);
+  const usersUnsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -121,70 +124,95 @@ export default function Dashboard() {
 
         const savedTheme = localStorage.getItem("app-theme") || "dark";
         setTheme(savedTheme);
-        loadFiles();
-        loadUsers();
+        setupFilesListener();
+        setupUsersListener();
       } else {
         navigate("/login");
       }
       setIsAuthLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      // Clean up listeners on unmount
+      if (filesUnsubscribeRef.current) {
+        filesUnsubscribeRef.current();
+      }
+      if (usersUnsubscribeRef.current) {
+        usersUnsubscribeRef.current();
+      }
+    };
   }, [navigate]);
 
   // ============= FILES MANAGEMENT =============
-  const loadFiles = async () => {
-    setLoading(true);
-    try {
-      if (!auth.currentUser) return;
-      const q = query(
-        collection(db, "files"),
-        where("userId", "==", auth.currentUser.uid),
-      );
-      const docs = await getDocs(q);
-      const fileList: FileItem[] = docs.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-        size: doc.data().size,
-        uploadedAt: new Date(doc.data().uploadedAt).toLocaleDateString(),
-        shared: doc.data().shared || false,
-        shareUrl: doc.data().shareUrl,
-        storagePath: doc.data().storagePath,
-      }));
-      setFiles(fileList);
+  const setupFilesListener = () => {
+    if (!auth.currentUser) return;
 
-      // Calculate storage used
-      let totalSize = 0;
-      fileList.forEach((file) => {
-        const sizeStr = file.size;
-        if (sizeStr.includes("MB")) {
-          totalSize += parseFloat(sizeStr) * 1024 * 1024;
-        } else if (sizeStr.includes("KB")) {
-          totalSize += parseFloat(sizeStr) * 1024;
-        }
-      });
-
-      // Update user plan storage used and persist to Firestore
-      if (userId) {
-        const updatedPlan = {
-          ...userPlan,
-          storageUsed: totalSize,
-        };
-        setUserPlan(updatedPlan);
-
-        // Persist storage to Firestore so it doesn't reset on reload
-        try {
-          const planRef = doc(db, "userPlans", userId);
-          await updateDoc(planRef, { storageUsed: totalSize });
-        } catch (error) {
-          console.error("Error updating storage in Firestore:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Error loading files:", error);
-    } finally {
-      setLoading(false);
+    // Unsubscribe from previous listener if exists
+    if (filesUnsubscribeRef.current) {
+      filesUnsubscribeRef.current();
     }
+
+    setLoading(true);
+    const q = query(
+      collection(db, "files"),
+      where("userId", "==", auth.currentUser.uid),
+    );
+
+    // Set up real-time listener
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const fileList: FileItem[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          size: doc.data().size,
+          uploadedAt: new Date(doc.data().uploadedAt).toLocaleDateString(),
+          shared: doc.data().shared || false,
+          shareUrl: doc.data().shareUrl,
+          storagePath: doc.data().storagePath,
+        }));
+        setFiles(fileList);
+
+        // Calculate storage used
+        let totalSize = 0;
+        fileList.forEach((file) => {
+          const sizeStr = file.size;
+          if (sizeStr.includes("MB")) {
+            totalSize += parseFloat(sizeStr) * 1024 * 1024;
+          } else if (sizeStr.includes("KB")) {
+            totalSize += parseFloat(sizeStr) * 1024;
+          }
+        });
+
+        // Update user plan storage used and persist to Firestore
+        if (userId) {
+          const updatedPlan = {
+            ...userPlan,
+            storageUsed: totalSize,
+          };
+          setUserPlan(updatedPlan);
+
+          // Persist storage to Firestore so it doesn't reset on reload
+          try {
+            const planRef = doc(db, "userPlans", userId);
+            updateDoc(planRef, { storageUsed: totalSize }).catch((error) => {
+              console.error("Error updating storage in Firestore:", error);
+            });
+          } catch (error) {
+            console.error("Error updating storage in Firestore:", error);
+          }
+        }
+
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error listening to files:", error);
+        setLoading(false);
+      },
+    );
+
+    filesUnsubscribeRef.current = unsubscribe;
   };
 
   const handleFileUpload = async (filesToUpload: File[]) => {
@@ -300,8 +328,6 @@ export default function Dashboard() {
       setUploadProgress(100);
       setUploadStage("complete");
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      loadFiles();
     } catch (error) {
       console.error("Error uploading file:", error);
       setUploadError("Upload failed. Please try again.");
@@ -371,19 +397,30 @@ export default function Dashboard() {
   };
 
   // ============= USERS MANAGEMENT =============
-  const loadUsers = async () => {
-    try {
-      const docs = await getDocs(collection(db, "users"));
-      const userList: User[] = docs.docs.map((doc) => ({
-        id: doc.id,
-        name: doc.data().name,
-        email: doc.data().email,
-        role: doc.data().role || "user",
-      }));
-      setUsers(userList);
-    } catch (error) {
-      console.error("Error loading users:", error);
+  const setupUsersListener = () => {
+    // Unsubscribe from previous listener if exists
+    if (usersUnsubscribeRef.current) {
+      usersUnsubscribeRef.current();
     }
+
+    // Set up real-time listener
+    const unsubscribe = onSnapshot(
+      collection(db, "users"),
+      (snapshot) => {
+        const userList: User[] = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          email: doc.data().email,
+          role: doc.data().role || "user",
+        }));
+        setUsers(userList);
+      },
+      (error) => {
+        console.error("Error listening to users:", error);
+      },
+    );
+
+    usersUnsubscribeRef.current = unsubscribe;
   };
 
   const handleAddUser = async (
@@ -398,7 +435,6 @@ export default function Dashboard() {
         role,
         createdAt: new Date().toISOString(),
       });
-      loadUsers();
     } catch (error) {
       console.error("Error adding user:", error);
     }
@@ -408,7 +444,6 @@ export default function Dashboard() {
     if (!confirm("Delete this user? This action cannot be undone.")) return;
     try {
       await deleteDoc(doc(db, "users", userId));
-      loadUsers();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -420,7 +455,6 @@ export default function Dashboard() {
   ) => {
     try {
       await updateDoc(doc(db, "users", userId), { role: newRole });
-      loadUsers();
     } catch (error) {
       console.error("Error updating user:", error);
     }

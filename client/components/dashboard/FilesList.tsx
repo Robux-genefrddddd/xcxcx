@@ -14,6 +14,7 @@ import { storage } from "@/lib/firebase";
 import { ref, getDownloadURL } from "firebase/storage";
 import { getThemeColors } from "@/lib/theme-colors";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface FileItem {
   id: string;
@@ -48,6 +49,7 @@ export function FilesList({
   onCopyShareLink,
   isPremium = false,
 }: FilesListProps) {
+  const { toast } = useToast();
   const colors = getThemeColors(theme);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -62,7 +64,11 @@ export function FilesList({
 
   const handleDownload = async (file: FileItem) => {
     if (!file.storagePath) {
-      console.error("File storage path not found for", file.name);
+      toast({
+        title: "Error",
+        description:
+          "File information not found. Please refresh and try again.",
+      });
       return;
     }
 
@@ -115,7 +121,13 @@ export function FilesList({
         URL.revokeObjectURL(blobUrl);
       }, 100);
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error downloading file:", error);
+      toast({
+        title: "Download Failed",
+        description: errorMessage,
+      });
     } finally {
       setDownloadingId(null);
     }
