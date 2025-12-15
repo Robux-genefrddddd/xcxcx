@@ -99,7 +99,9 @@ export function FileUpload({
               color: colors.text,
             }}
           >
-            {dragActive ? "Drop file here" : "Upload a file"}
+            {dragActive
+              ? `Drop ${isPremium ? "files" : "file"} here`
+              : `Upload ${isPremium ? "files" : "a file"}`}
           </p>
           <p
             className="text-sm"
