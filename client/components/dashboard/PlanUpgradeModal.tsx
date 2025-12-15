@@ -296,7 +296,7 @@ export function PlanUpgradeModal({
                         style={{ color: colors.textSecondary }}
                       >
                         {[
-                          "1 GB Storage (vs 100 MB free)",
+                          "Unlimited Storage (vs 1 TB free)",
                           "Priority Support",
                           "Advanced File Management",
                           "Unlimited Share Links",
