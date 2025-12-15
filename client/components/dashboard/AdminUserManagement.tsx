@@ -77,25 +77,26 @@ export function AdminUserManagement({
           console.error(`Error loading plan for ${userId}:`, error);
         }
 
-        let email = "";
-        let name = "";
-        try {
-          const filesQuery = query(
-            collection(db, "files"),
-            where("userId", "==", userId),
-          );
-          const filesSnapshot = await getDocs(filesQuery);
-          if (filesSnapshot.docs.length > 0) {
-            const userFile = filesSnapshot.docs[0];
-            email = userFile.data().userEmail || "";
-            name = userFile.data().userName || "";
-          }
+        // Get email from userRoles (primary source)
+        let email = roleData.email || "";
+        let name = roleData.displayName || "";
 
-          if (!email && roleData.email) {
-            email = roleData.email;
+        // If email not found, try to get from files as fallback
+        if (!email) {
+          try {
+            const filesQuery = query(
+              collection(db, "files"),
+              where("userId", "==", userId),
+            );
+            const filesSnapshot = await getDocs(filesQuery);
+            if (filesSnapshot.docs.length > 0) {
+              const userFile = filesSnapshot.docs[0];
+              email = userFile.data().userEmail || "";
+              if (!name) name = userFile.data().userName || "";
+            }
+          } catch (error) {
+            console.error(`Error loading user info for ${userId}:`, error);
           }
-        } catch (error) {
-          console.error(`Error loading user info for ${userId}:`, error);
         }
 
         userList.push({
