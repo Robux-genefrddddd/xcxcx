@@ -615,8 +615,8 @@ export default function Dashboard() {
                   onFileSelected={handleFileUpload}
                   uploading={uploading}
                   theme={theme}
-                  maxFileSize={userPlan?.type === "premium" ? 800 : 300}
-                  isPremium={userPlan?.type === "premium"}
+                  maxFileSize={isPremiumUser ? 800 : 300}
+                  isPremium={isPremiumUser}
                 />
                 <FilesList
                   files={files}
@@ -625,7 +625,7 @@ export default function Dashboard() {
                   onShare={handleShareFile}
                   onDelete={handleDeleteFile}
                   onCopyShareLink={() => {}}
-                  isPremium={userPlan?.type === "premium"}
+                  isPremium={isPremiumUser}
                 />
               </div>
             )}
