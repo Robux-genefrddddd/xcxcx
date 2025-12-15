@@ -83,11 +83,12 @@ export function ConfirmDialog({
           <button
             onClick={onClose}
             disabled={loading}
-            className="flex-1 py-2 px-3 text-xs font-medium rounded transition-all disabled:opacity-50 hover:opacity-90"
+            className="flex-1 py-2 px-3 text-xs font-medium transition-all disabled:opacity-50 hover:opacity-90"
             style={{
               backgroundColor: "transparent",
               color: "#D1D5DB",
               border: "1px solid #374151",
+              borderRadius: "10px",
             }}
           >
             {cancelText}
@@ -95,10 +96,11 @@ export function ConfirmDialog({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 py-2 px-3 text-xs font-medium rounded transition-all disabled:opacity-50 hover:opacity-90"
+            className="flex-1 py-2 px-3 text-xs font-medium transition-all disabled:opacity-50 hover:opacity-90"
             style={{
               backgroundColor: isDangerous ? "#DC2626" : colors.primary,
               color: "white",
+              borderRadius: "10px",
             }}
           >
             {loading ? "..." : confirmText}
