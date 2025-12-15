@@ -3,10 +3,11 @@ import { Upload } from "lucide-react";
 import { getThemeColors } from "@/lib/theme-colors";
 
 interface FileUploadProps {
-  onFileSelected: (file: File) => void;
+  onFileSelected: (files: File[]) => void;
   uploading: boolean;
   theme: string;
   maxFileSize?: number; // in MB
+  isPremium?: boolean;
 }
 
 export function FileUpload({
@@ -14,6 +15,7 @@ export function FileUpload({
   uploading,
   theme,
   maxFileSize = 300,
+  isPremium = false,
 }: FileUploadProps) {
   const colors = getThemeColors(theme);
   const inputRef = useRef<HTMLInputElement>(null);
