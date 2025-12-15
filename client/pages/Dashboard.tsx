@@ -232,7 +232,8 @@ export default function Dashboard() {
       return;
 
     // Determine max file size based on plan
-    const maxFileSize = userPlan.type === "premium" ? 800 : 300;
+    const isPremium = userPlan.type === "premium" || userPlan.storageLimit === Infinity;
+    const maxFileSize = isPremium ? 800 : 300;
     const maxFileSizeBytes = maxFileSize * 1024 * 1024;
 
     // Reset upload state
