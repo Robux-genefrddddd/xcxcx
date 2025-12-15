@@ -134,7 +134,7 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
               }}
             />
           </div>
-          {plan.type === "premium" && (
+          {(plan.type === "premium" || plan.storageLimit === Infinity) && (
             <p
               style={{ color: colors.primary }}
               className="text-xs mt-2 font-medium"
