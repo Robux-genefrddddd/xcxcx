@@ -34,6 +34,32 @@ export function ShareFileModal({
   const [copied, setCopied] = useState(false);
   const [step, setStep] = useState<"options" | "confirm">("options");
   const [showPassword, setShowPassword] = useState(false);
+  const [fileStats, setFileStats] = useState<FileStats>({
+    viewCount: 0,
+    downloadCount: 0,
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      loadFileStats();
+    }
+  }, [isOpen]);
+
+  const loadFileStats = async () => {
+    try {
+      const fileRef = doc(db, "files", fileId);
+      const fileSnap = await getDoc(fileRef);
+      if (fileSnap.exists()) {
+        const fileData = fileSnap.data();
+        setFileStats({
+          viewCount: fileData.viewCount || 0,
+          downloadCount: fileData.downloadCount || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading file stats:", error);
+    }
+  };
 
   const generateShareUrl = () => {
     return `${window.location.origin}/share/${fileId}`;
