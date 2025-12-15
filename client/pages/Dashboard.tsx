@@ -88,6 +88,7 @@ export default function Dashboard() {
   const filesUnsubscribeRef = useRef<(() => void) | null>(null);
   const usersUnsubscribeRef = useRef<(() => void) | null>(null);
   const planUnsubscribeRef = useRef<(() => void) | null>(null);
+  const { canUpload, recordUpload } = useUploadRateLimit();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
