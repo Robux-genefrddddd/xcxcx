@@ -234,6 +234,15 @@ export default function Dashboard() {
     if (!filesToUpload || filesToUpload.length === 0 || !auth.currentUser)
       return;
 
+    // Check rate limit (1 upload per 10 seconds)
+    const rateLimitCheck = canUpload();
+    if (!rateLimitCheck.allowed) {
+      toast.error(
+        `Rate limit exceeded. Please wait ${rateLimitCheck.waitTimeSeconds} second${rateLimitCheck.waitTimeSeconds !== 1 ? "s" : ""} before uploading again.`,
+      );
+      return;
+    }
+
     // Determine max file size based on plan
     const isPremium =
       userPlan.type === "premium" || userPlan.storageLimit === Infinity;
