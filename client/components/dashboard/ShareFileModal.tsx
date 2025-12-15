@@ -1,7 +1,7 @@
-import { X, Lock, Link2, Copy, Check, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { X, Lock, Link2, Copy, Check, Eye, EyeOff, Eye as EyeIcon, Download } from "lucide-react";
+import { useState, useEffect } from "react";
 import { getThemeColors } from "@/lib/theme-colors";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface ShareFileModalProps {
@@ -11,6 +11,11 @@ interface ShareFileModalProps {
   fileName: string;
   theme: string;
   onShareComplete?: () => void;
+}
+
+interface FileStats {
+  viewCount: number;
+  downloadCount: number;
 }
 
 export function ShareFileModal({
