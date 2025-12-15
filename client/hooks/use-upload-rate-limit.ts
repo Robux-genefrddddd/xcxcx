@@ -14,7 +14,10 @@ export function useUploadRateLimit() {
     uploadCount: 0,
   });
 
-  const canUpload = useCallback((): { allowed: boolean; waitTimeSeconds: number } => {
+  const canUpload = useCallback((): {
+    allowed: boolean;
+    waitTimeSeconds: number;
+  } => {
     const now = Date.now();
     const state = rateLimitStateRef.current;
 
@@ -28,7 +31,9 @@ export function useUploadRateLimit() {
     // If within the rate limit window
     if (timeSinceLastUpload < RATE_LIMIT_WINDOW) {
       if (state.uploadCount >= MAX_UPLOADS_PER_WINDOW) {
-        const waitTime = Math.ceil((RATE_LIMIT_WINDOW - timeSinceLastUpload) / 1000);
+        const waitTime = Math.ceil(
+          (RATE_LIMIT_WINDOW - timeSinceLastUpload) / 1000,
+        );
         return { allowed: false, waitTimeSeconds: waitTime };
       }
     } else {
@@ -44,7 +49,10 @@ export function useUploadRateLimit() {
     const state = rateLimitStateRef.current;
 
     // If this is the first upload or window has expired, reset
-    if (state.lastUploadTime === null || now - state.lastUploadTime >= RATE_LIMIT_WINDOW) {
+    if (
+      state.lastUploadTime === null ||
+      now - state.lastUploadTime >= RATE_LIMIT_WINDOW
+    ) {
       state.lastUploadTime = now;
       state.uploadCount = 1;
     } else {
