@@ -549,9 +549,7 @@ export default function Dashboard() {
                   theme={theme}
                   onShare={handleShareFile}
                   onDelete={handleDeleteFile}
-                  onCopyShareLink={(url) => {
-                    alert("Share link copied to clipboard!");
-                  }}
+                  onCopyShareLink={() => {}}
                   isPremium={userPlan?.type === "premium"}
                 />
               </div>
