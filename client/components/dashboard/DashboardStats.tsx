@@ -72,15 +72,6 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
     { day: "Sun", uploads: 8 },
   ];
 
-  const storageBreakdown = [
-    { type: "Documents", count: fileTypeMap.Documents, color: "#3B82F6" },
-    { type: "Images", count: fileTypeMap.Images, color: "#8B5CF6" },
-    { type: "Videos", count: fileTypeMap.Videos, color: "#EC4899" },
-    { type: "Archives", count: fileTypeMap.Archives, color: "#F59E0B" },
-  ]
-    .filter((item) => item.count > 0)
-    .sort((a, b) => b.count - a.count);
-
   const lastUploadFile =
     files.length > 0 ? files[files.length - 1].uploadedAt : "—";
 
