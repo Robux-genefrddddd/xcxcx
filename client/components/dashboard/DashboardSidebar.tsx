@@ -265,7 +265,7 @@ export function DashboardSidebar({
           </div>
         ) : null}
 
-        {userPlan && userPlan.type === "free" && onUpgradeClick && (
+        {userPlan && !isPremium && onUpgradeClick && (
           <button
             onClick={onUpgradeClick}
             className="w-full px-3 py-2 text-xs font-semibold transition-colors border rounded-lg"
