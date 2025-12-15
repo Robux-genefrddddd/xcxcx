@@ -23,6 +23,7 @@ interface SharedFile {
 }
 
 export default function Share() {
+  const { toast } = useToast();
   const { fileId } = useParams<{ fileId: string }>();
   const [file, setFile] = useState<SharedFile | null>(null);
   const [loading, setLoading] = useState(true);
