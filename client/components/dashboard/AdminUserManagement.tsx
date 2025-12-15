@@ -215,7 +215,7 @@ export function AdminUserManagement({
             style={{ borderColor: colors.accent }}
           ></div>
         </div>
-      ) : users.length === 0 ? (
+      ) : filteredUsers.length === 0 ? (
         <div
           className="p-12 rounded-xl border text-center"
           style={{
@@ -223,11 +223,13 @@ export function AdminUserManagement({
             borderColor: colors.border,
           }}
         >
-          <p style={{ color: colors.textSecondary }}>No users found</p>
+          <p style={{ color: colors.textSecondary }}>
+            {searchQuery ? "No users match your search" : "No users found"}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {users.map((user) => {
+          {filteredUsers.map((user) => {
             const roleInfo = getRoleInfo(user.role);
             const planInfo = getPlanInfo(user.plan);
             const isCurrentUser = user.id === currentUserId;
