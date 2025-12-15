@@ -231,7 +231,7 @@ export function SharedFilesList({
                         {file.name}
                       </p>
                       <div
-                        className="flex items-center gap-3 mt-0.5 text-xs"
+                        className="flex items-center gap-3 mt-0.5 text-xs flex-wrap"
                         style={{ color: colors.textSecondary }}
                       >
                         <span>{file.size}</span>
@@ -248,6 +248,31 @@ export function SharedFilesList({
                           <Globe className="w-3 h-3" />
                           Public
                         </span>
+                        {fileStats[file.id] && (
+                          <>
+                            <span>•</span>
+                            <span
+                              className="px-1.5 py-0.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                              style={{
+                                backgroundColor: "rgba(100, 116, 139, 0.15)",
+                                color: "#94A3B8",
+                              }}
+                            >
+                              <Eye className="w-3 h-3" />
+                              {fileStats[file.id].viewCount}
+                            </span>
+                            <span
+                              className="px-1.5 py-0.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                              style={{
+                                backgroundColor: "rgba(34, 197, 94, 0.15)",
+                                color: "#22C55E",
+                              }}
+                            >
+                              <Download className="w-3 h-3" />
+                              {fileStats[file.id].downloadCount}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
