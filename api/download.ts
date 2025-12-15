@@ -50,7 +50,7 @@ export default async function handler(
     const { storagePath, fileName } = body as { storagePath?: string; fileName?: string };
 
     if (!storagePath) {
-      return res.status(400).json({ error: "Storage path is required" });
+      return sendJson(res, 400, { error: "Storage path is required" });
     }
 
     console.log("Download request - storagePath:", storagePath);
