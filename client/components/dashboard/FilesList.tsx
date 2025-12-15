@@ -120,7 +120,12 @@ export function FilesList({
         URL.revokeObjectURL(blobUrl);
       }, 100);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Error downloading file:", error);
+      toast({
+        title: "Download Failed",
+        description: errorMessage,
+      });
     } finally {
       setDownloadingId(null);
     }
