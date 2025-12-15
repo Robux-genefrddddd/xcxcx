@@ -402,7 +402,7 @@ export function PlanUpgradeModal({
                     >
                       <div className="space-y-2">
                         {[
-                          "✓ 1 GB Storage unlocked",
+                          "✓ Unlimited Storage unlocked",
                           "✓ Priority Support enabled",
                           "✓ Advanced Features available",
                         ].map((item, idx) => (
