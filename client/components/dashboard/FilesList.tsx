@@ -32,6 +32,7 @@ interface FilesListProps {
   onShare: (fileId: string) => void;
   onDelete: (fileId: string) => void;
   onCopyShareLink: (url: string) => void;
+  isPremium?: boolean;
 }
 
 const getFileIcon = (filename: string) => {
