@@ -9,9 +9,19 @@ import {
   EyeOff,
 } from "lucide-react";
 import { db, storage } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
+
+function getOrCreateSessionId(): string {
+  const key = "visitor_session_id";
+  let sessionId = sessionStorage.getItem(key);
+  if (!sessionId) {
+    sessionId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem(key, sessionId);
+  }
+  return sessionId;
+}
 
 interface SharedFile {
   id: string;
