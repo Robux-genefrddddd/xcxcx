@@ -150,6 +150,9 @@ export default function Dashboard() {
       if (usersUnsubscribeRef.current) {
         usersUnsubscribeRef.current();
       }
+      if (planUnsubscribeRef.current) {
+        planUnsubscribeRef.current();
+      }
     };
   }, [navigate]);
 
