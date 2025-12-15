@@ -336,7 +336,6 @@ export default function Dashboard() {
 
   const handleDeleteFile = async (fileId: string) => {
     const file = files.find((f) => f.id === fileId);
-    if (!confirm("Delete this file? This action cannot be undone.")) return;
 
     try {
       await deleteDoc(doc(db, "files", fileId));
