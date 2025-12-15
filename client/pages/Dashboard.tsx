@@ -352,6 +352,9 @@ export default function Dashboard() {
         console.error("Error updating storage after upload:", error);
       }
 
+      // Record the upload for rate limiting
+      recordUpload();
+
       // Complete
       setUploadProgress(100);
       setUploadStage("complete");
