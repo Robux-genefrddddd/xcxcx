@@ -64,8 +64,33 @@ export function SharedFilesList({
   const [unshareConfirmOpen, setUnshareConfirmOpen] = useState(false);
   const [unshareFileId, setUnshareFileId] = useState<string | null>(null);
   const [unshareFileName, setUnshareFileName] = useState("");
+  const [fileStats, setFileStats] = useState<Record<string, { viewCount: number; downloadCount: number }>>({});
 
   const sharedFiles = files.filter((file) => file.shared);
+
+  useEffect(() => {
+    loadAllFileStats();
+  }, [files]);
+
+  const loadAllFileStats = async () => {
+    const stats: Record<string, { viewCount: number; downloadCount: number }> = {};
+    for (const file of sharedFiles) {
+      try {
+        const fileRef = doc(db, "files", file.id);
+        const fileSnap = await getDoc(fileRef);
+        if (fileSnap.exists()) {
+          const fileData = fileSnap.data();
+          stats[file.id] = {
+            viewCount: fileData.viewCount || 0,
+            downloadCount: fileData.downloadCount || 0,
+          };
+        }
+      } catch (error) {
+        console.error("Error loading stats for file:", file.id, error);
+      }
+    }
+    setFileStats(stats);
+  };
 
   const handleCopyShare = (fileId: string, shareUrl?: string) => {
     if (shareUrl) {
