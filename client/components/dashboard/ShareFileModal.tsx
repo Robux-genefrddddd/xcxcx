@@ -56,7 +56,6 @@ export function ShareFileModal({
       }
     } catch (error) {
       console.error("Error sharing file:", error);
-      alert("Failed to share file");
     } finally {
       setLoading(false);
     }
