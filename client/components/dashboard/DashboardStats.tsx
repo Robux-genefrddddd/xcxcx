@@ -110,7 +110,9 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
               </span>
             </p>
             <p className="text-xs" style={{ color: colors.textSecondary }}>
-              {storageLimitMB.toFixed(0)} MB limit
+              {typeof storageLimitMB === "number"
+                ? `${storageLimitMB.toFixed(0)} MB limit`
+                : "Unlimited storage"}
             </p>
           </div>
           <div
