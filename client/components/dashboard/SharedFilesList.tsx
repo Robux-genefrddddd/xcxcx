@@ -8,10 +8,14 @@ import {
   File,
   Check,
   Globe,
+  Download,
+  Eye,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getThemeColors } from "@/lib/theme-colors";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface FileItem {
   id: string;
@@ -21,6 +25,8 @@ interface FileItem {
   shared: boolean;
   shareUrl?: string;
   storagePath?: string;
+  viewCount?: number;
+  downloadCount?: number;
 }
 
 interface SharedFilesListProps {
