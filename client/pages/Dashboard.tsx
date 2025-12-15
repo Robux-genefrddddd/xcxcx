@@ -93,10 +93,23 @@ export default function Dashboard() {
         setUserName(user.displayName || "User");
         setUserEmail(user.email || "");
 
-        // Load user role
+        // Load user role and store email for admin panel
         try {
           const role = await getUserRole(user.uid);
           setUserRole(role);
+
+          // Store email in userRoles collection for admin panel display
+          const userRoleRef = doc(db, "userRoles", user.uid);
+          const userRoleSnap = await getDoc(userRoleRef);
+          if (userRoleSnap.exists()) {
+            const roleData = userRoleSnap.data();
+            if (!roleData.email || roleData.email !== user.email) {
+              await updateDoc(userRoleRef, {
+                email: user.email,
+                displayName: user.displayName,
+              });
+            }
+          }
         } catch (error) {
           console.error("Error loading user role:", error);
           setUserRole("user");
