@@ -217,8 +217,8 @@ export function PlanUpgradeModal({
                           color: colors.textSecondary,
                         }}
                       >
-                        Enter your premium activation key to unlock unlimited
-                        storage and advanced features.
+                        Enter your premium activation key to upgrade from 1 TB
+                        to unlimited storage and unlock advanced features.
                       </p>
                     </motion.div>
 
