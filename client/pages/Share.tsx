@@ -137,7 +137,10 @@ export default function Share() {
 
       // Track unique download
       const sessionId = getOrCreateSessionId();
-      if (!fileData.downloadedBy || !fileData.downloadedBy.includes(sessionId)) {
+      if (
+        !fileData.downloadedBy ||
+        !fileData.downloadedBy.includes(sessionId)
+      ) {
         try {
           await updateDoc(fileRef, {
             downloadedBy: arrayUnion(sessionId),

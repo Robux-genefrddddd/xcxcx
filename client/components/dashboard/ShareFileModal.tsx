@@ -1,4 +1,14 @@
-import { X, Lock, Link2, Copy, Check, Eye, EyeOff, Eye as EyeIcon, Download } from "lucide-react";
+import {
+  X,
+  Lock,
+  Link2,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Eye as EyeIcon,
+  Download,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { getThemeColors } from "@/lib/theme-colors";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
@@ -254,7 +264,10 @@ export function ShareFileModal({
           ) : (
             <div className="space-y-4 py-2">
               <div className="text-center space-y-3">
-                <div className="text-sm font-medium" style={{ color: "#10B981" }}>
+                <div
+                  className="text-sm font-medium"
+                  style={{ color: "#10B981" }}
+                >
                   ✓ Link created successfully
                 </div>
                 <div
@@ -280,26 +293,47 @@ export function ShareFileModal({
               </div>
 
               {/* Share Stats */}
-              <div className="grid grid-cols-2 gap-3 pt-3 border-t" style={{ borderColor: "#374151" }}>
-                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: "#1A1D20" }}>
+              <div
+                className="grid grid-cols-2 gap-3 pt-3 border-t"
+                style={{ borderColor: "#374151" }}
+              >
+                <div
+                  className="text-center p-3 rounded-lg"
+                  style={{ backgroundColor: "#1A1D20" }}
+                >
                   <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <EyeIcon className="w-3.5 h-3.5" style={{ color: colors.primary }} />
+                    <EyeIcon
+                      className="w-3.5 h-3.5"
+                      style={{ color: colors.primary }}
+                    />
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>
                       Views
                     </p>
                   </div>
-                  <p className="text-lg font-bold" style={{ color: colors.text }}>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: colors.text }}
+                  >
                     {fileStats.viewCount}
                   </p>
                 </div>
-                <div className="text-center p-3 rounded-lg" style={{ backgroundColor: "#1A1D20" }}>
+                <div
+                  className="text-center p-3 rounded-lg"
+                  style={{ backgroundColor: "#1A1D20" }}
+                >
                   <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <Download className="w-3.5 h-3.5" style={{ color: colors.primary }} />
+                    <Download
+                      className="w-3.5 h-3.5"
+                      style={{ color: colors.primary }}
+                    />
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>
                       Downloads
                     </p>
                   </div>
-                  <p className="text-lg font-bold" style={{ color: colors.text }}>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: colors.text }}
+                  >
                     {fileStats.downloadCount}
                   </p>
                 </div>

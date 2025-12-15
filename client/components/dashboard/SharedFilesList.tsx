@@ -64,7 +64,9 @@ export function SharedFilesList({
   const [unshareConfirmOpen, setUnshareConfirmOpen] = useState(false);
   const [unshareFileId, setUnshareFileId] = useState<string | null>(null);
   const [unshareFileName, setUnshareFileName] = useState("");
-  const [fileStats, setFileStats] = useState<Record<string, { viewCount: number; downloadCount: number }>>({});
+  const [fileStats, setFileStats] = useState<
+    Record<string, { viewCount: number; downloadCount: number }>
+  >({});
 
   const sharedFiles = files.filter((file) => file.shared);
 
@@ -73,7 +75,8 @@ export function SharedFilesList({
   }, [files]);
 
   const loadAllFileStats = async () => {
-    const stats: Record<string, { viewCount: number; downloadCount: number }> = {};
+    const stats: Record<string, { viewCount: number; downloadCount: number }> =
+      {};
     for (const file of sharedFiles) {
       try {
         const fileRef = doc(db, "files", file.id);
