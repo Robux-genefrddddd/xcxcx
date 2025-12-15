@@ -543,6 +543,7 @@ export default function Dashboard() {
   }
 
   const themeColors = getThemeColors(theme);
+  const isPremiumUser = userPlan.type === "premium" || userPlan.storageLimit === Infinity;
 
   return (
     <div
