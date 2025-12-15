@@ -320,8 +320,6 @@ export default function Dashboard() {
   };
 
   const handleUnshareFile = async (fileId: string) => {
-    if (!confirm("Remove sharing for this file?")) return;
-
     try {
       await updateDoc(doc(db, "files", fileId), {
         shared: false,
@@ -330,7 +328,6 @@ export default function Dashboard() {
       loadFiles();
     } catch (error) {
       console.error("Error unsharing file:", error);
-      alert("Failed to remove sharing. Please try again.");
     }
   };
 
