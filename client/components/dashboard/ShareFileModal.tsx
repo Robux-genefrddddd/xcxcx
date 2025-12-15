@@ -167,7 +167,10 @@ export function ShareFileModal({
                         >
                           {option.label}
                         </p>
-                        <p className="text-xs mt-1" style={{ color: "#6B7280" }}>
+                        <p
+                          className="text-xs mt-1"
+                          style={{ color: "#6B7280" }}
+                        >
                           {option.desc}
                         </p>
                       </div>
@@ -179,7 +182,10 @@ export function ShareFileModal({
               {/* Password Input */}
               {shareType === "password" && (
                 <div className="space-y-2 pt-2">
-                  <label className="block text-xs font-medium" style={{ color: "#D1D5DB" }}>
+                  <label
+                    className="block text-xs font-medium"
+                    style={{ color: "#D1D5DB" }}
+                  >
                     Password
                   </label>
                   <div className="relative">

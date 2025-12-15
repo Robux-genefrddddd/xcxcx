@@ -188,7 +188,8 @@ export default function Dashboard() {
   };
 
   const handleFileUpload = async (filesToUpload: File[]) => {
-    if (!filesToUpload || filesToUpload.length === 0 || !auth.currentUser) return;
+    if (!filesToUpload || filesToUpload.length === 0 || !auth.currentUser)
+      return;
 
     // Determine max file size based on plan
     const maxFileSize = userPlan.type === "premium" ? 800 : 300;

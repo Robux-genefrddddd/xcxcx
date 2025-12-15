@@ -55,7 +55,9 @@ export function FilesList({
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteFileId, setDeleteFileId] = useState<string | null>(null);
   const [deleteFileName, setDeleteFileName] = useState("");
-  const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
+  const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(
+    new Set(),
+  );
   const [deleteConfirmBulk, setDeleteConfirmBulk] = useState(false);
 
   const handleDownload = async (file: FileItem) => {
@@ -190,7 +192,9 @@ export function FilesList({
             {isPremium && files.length > 0 && (
               <input
                 type="checkbox"
-                checked={selectedFileIds.size === files.length && files.length > 0}
+                checked={
+                  selectedFileIds.size === files.length && files.length > 0
+                }
                 onChange={toggleSelectAll}
                 className="w-4 h-4 cursor-pointer rounded"
                 style={{
@@ -307,7 +311,9 @@ export function FilesList({
                   key={file.id}
                   className="px-6 py-3 flex items-center justify-between group hover:bg-opacity-50 transition-all duration-200 hover:scale-[1.02] origin-left"
                   style={{
-                    backgroundColor: isSelected ? colors.accentLight : colors.card,
+                    backgroundColor: isSelected
+                      ? colors.accentLight
+                      : colors.card,
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {

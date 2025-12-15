@@ -226,7 +226,6 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
           </AreaChart>
         </ResponsiveContainer>
       </div>
-
     </div>
   );
 }
