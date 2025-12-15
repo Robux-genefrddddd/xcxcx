@@ -268,7 +268,10 @@ export function AdminUserManagement({
                           {user.email}
                         </p>
                         {isCurrentUser && (
-                          <p className="text-xs" style={{ color: colors.primary }}>
+                          <p
+                            className="text-xs"
+                            style={{ color: colors.primary }}
+                          >
                             (You)
                           </p>
                         )}
@@ -333,8 +336,8 @@ export function AdminUserManagement({
                           <option value="founder">Founder</option>
                         </select>
 
-                        {canPerformCriticalActions(userRole) && (
-                          deleteConfirm === user.id ? (
+                        {canPerformCriticalActions(userRole) &&
+                          (deleteConfirm === user.id ? (
                             <div className="flex gap-1">
                               <button
                                 onClick={() => deleteUser(user.id)}
@@ -368,8 +371,7 @@ export function AdminUserManagement({
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
-                          )
-                        )}
+                          ))}
                       </>
                     )}
                   </div>

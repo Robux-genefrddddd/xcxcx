@@ -71,7 +71,9 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const colors = getThemeColors(theme);
   const storageUsedMB = userPlan ? userPlan.storageUsed / (1024 * 1024) : 0;
-  const isPremium = userPlan && (userPlan.type === "premium" || userPlan.storageLimit === Infinity);
+  const isPremium =
+    userPlan &&
+    (userPlan.type === "premium" || userPlan.storageLimit === Infinity);
   const storagePercentage =
     userPlan && userPlan.storageLimit !== Infinity
       ? (userPlan.storageUsed / userPlan.storageLimit) * 100
@@ -251,12 +253,10 @@ export function DashboardSidebar({
               <p
                 className="text-xs font-medium px-2 py-0.5 rounded"
                 style={{
-                  backgroundColor:
-                    isPremium
-                      ? "rgba(34, 197, 94, 0.15)"
-                      : "rgba(100, 116, 139, 0.15)",
-                  color:
-                    isPremium ? "#22C55E" : colors.primary,
+                  backgroundColor: isPremium
+                    ? "rgba(34, 197, 94, 0.15)"
+                    : "rgba(100, 116, 139, 0.15)",
+                  color: isPremium ? "#22C55E" : colors.primary,
                 }}
               >
                 {isPremium ? "Premium" : "Free"}

@@ -232,7 +232,8 @@ export default function Dashboard() {
       return;
 
     // Determine max file size based on plan
-    const isPremium = userPlan.type === "premium" || userPlan.storageLimit === Infinity;
+    const isPremium =
+      userPlan.type === "premium" || userPlan.storageLimit === Infinity;
     const maxFileSize = isPremium ? 800 : 300;
     const maxFileSizeBytes = maxFileSize * 1024 * 1024;
 
@@ -543,7 +544,8 @@ export default function Dashboard() {
   }
 
   const themeColors = getThemeColors(theme);
-  const isPremiumUser = userPlan.type === "premium" || userPlan.storageLimit === Infinity;
+  const isPremiumUser =
+    userPlan.type === "premium" || userPlan.storageLimit === Infinity;
 
   return (
     <div

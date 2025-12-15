@@ -67,10 +67,7 @@ export function AdminPanel({ theme, userRole, userId }: AdminPanelProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2
-          className="text-xl font-bold"
-          style={{ color: colors.text }}
-        >
+        <h2 className="text-xl font-bold" style={{ color: colors.text }}>
           Administration
         </h2>
         <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
@@ -90,13 +87,8 @@ export function AdminPanel({ theme, userRole, userId }: AdminPanelProps) {
             className="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all font-medium"
             style={{
               backgroundColor:
-                activeTab === tab.id
-                  ? colors.card
-                  : "transparent",
-              color:
-                activeTab === tab.id
-                  ? colors.text
-                  : colors.textSecondary,
+                activeTab === tab.id ? colors.card : "transparent",
+              color: activeTab === tab.id ? colors.text : colors.textSecondary,
             }}
           >
             {tab.icon}
