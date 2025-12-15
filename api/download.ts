@@ -1,15 +1,53 @@
 import { IncomingMessage, ServerResponse } from "http";
 
+function setJsonHeader(res: ServerResponse) {
+  res.setHeader("Content-Type", "application/json");
+}
+
+function sendJson(res: ServerResponse, statusCode: number, data: unknown) {
+  setJsonHeader(res);
+  res.statusCode = statusCode;
+  res.end(JSON.stringify(data));
+}
+
+async function parseRequestBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+    req.on("end", () => {
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch (e) {
+        reject(new Error("Invalid JSON"));
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
 export default async function handler(
-  req: IncomingMessage & { body?: Record<string, unknown> },
+  req: IncomingMessage,
   res: ServerResponse
 ) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.statusCode = 200;
+    res.end();
+    return;
+  }
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return sendJson(res, 405, { error: "Method not allowed" });
   }
 
   try {
-    const { storagePath, fileName } = req.body;
+    const body = await parseRequestBody(req);
+    const { storagePath, fileName } = body as { storagePath?: string; fileName?: string };
 
     if (!storagePath) {
       return res.status(400).json({ error: "Storage path is required" });
