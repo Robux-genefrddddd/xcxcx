@@ -14,6 +14,8 @@ import { AdminPanel } from "@/components/dashboard/AdminPanel";
 import { auth, db, storage } from "@/lib/firebase";
 import { getThemeColors, getThemeBackgroundImage } from "@/lib/theme-colors";
 import { getUserRole, UserRole } from "@/lib/auth-utils";
+import { useUploadRateLimit } from "@/hooks/use-upload-rate-limit";
+import { toast } from "sonner";
 import {
   collection,
   addDoc,
@@ -86,6 +88,7 @@ export default function Dashboard() {
   const filesUnsubscribeRef = useRef<(() => void) | null>(null);
   const usersUnsubscribeRef = useRef<(() => void) | null>(null);
   const planUnsubscribeRef = useRef<(() => void) | null>(null);
+  const { canUpload, recordUpload } = useUploadRateLimit();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -231,6 +234,15 @@ export default function Dashboard() {
     if (!filesToUpload || filesToUpload.length === 0 || !auth.currentUser)
       return;
 
+    // Check rate limit (1 upload per 10 seconds)
+    const rateLimitCheck = canUpload();
+    if (!rateLimitCheck.allowed) {
+      toast.error(
+        `Rate limit exceeded. Please wait ${rateLimitCheck.waitTimeSeconds} second${rateLimitCheck.waitTimeSeconds !== 1 ? "s" : ""} before uploading again.`,
+      );
+      return;
+    }
+
     // Determine max file size based on plan
     const isPremium =
       userPlan.type === "premium" || userPlan.storageLimit === Infinity;
@@ -339,6 +351,9 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error updating storage after upload:", error);
       }
+
+      // Record the upload for rate limiting
+      recordUpload();
 
       // Complete
       setUploadProgress(100);
