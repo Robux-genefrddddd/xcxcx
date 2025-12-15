@@ -252,14 +252,14 @@ export function DashboardSidebar({
                 className="text-xs font-medium px-2 py-0.5 rounded"
                 style={{
                   backgroundColor:
-                    userPlan.type === "premium"
+                    isPremium
                       ? "rgba(34, 197, 94, 0.15)"
                       : "rgba(100, 116, 139, 0.15)",
                   color:
-                    userPlan.type === "premium" ? "#22C55E" : colors.primary,
+                    isPremium ? "#22C55E" : colors.primary,
                 }}
               >
-                {userPlan.type === "premium" ? "Premium" : "Free"}
+                {isPremium ? "Premium" : "Free"}
               </p>
             </div>
           </div>
