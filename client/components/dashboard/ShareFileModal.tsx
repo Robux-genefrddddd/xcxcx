@@ -1,7 +1,17 @@
-import { X, Lock, Link2, Copy, Check, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import {
+  X,
+  Lock,
+  Link2,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Eye as EyeIcon,
+  Download,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 import { getThemeColors } from "@/lib/theme-colors";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface ShareFileModalProps {
@@ -11,6 +21,11 @@ interface ShareFileModalProps {
   fileName: string;
   theme: string;
   onShareComplete?: () => void;
+}
+
+interface FileStats {
+  viewCount: number;
+  downloadCount: number;
 }
 
 export function ShareFileModal({
@@ -29,6 +44,32 @@ export function ShareFileModal({
   const [copied, setCopied] = useState(false);
   const [step, setStep] = useState<"options" | "confirm">("options");
   const [showPassword, setShowPassword] = useState(false);
+  const [fileStats, setFileStats] = useState<FileStats>({
+    viewCount: 0,
+    downloadCount: 0,
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      loadFileStats();
+    }
+  }, [isOpen]);
+
+  const loadFileStats = async () => {
+    try {
+      const fileRef = doc(db, "files", fileId);
+      const fileSnap = await getDoc(fileRef);
+      if (fileSnap.exists()) {
+        const fileData = fileSnap.data();
+        setFileStats({
+          viewCount: fileData.viewCount || 0,
+          downloadCount: fileData.downloadCount || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading file stats:", error);
+    }
+  };
 
   const generateShareUrl = () => {
     return `${window.location.origin}/share/${fileId}`;
@@ -221,30 +262,82 @@ export function ShareFileModal({
               )}
             </div>
           ) : (
-            <div className="space-y-3 text-center py-2">
-              <div className="text-sm font-medium" style={{ color: "#10B981" }}>
-                ✓ Link created successfully
-              </div>
-              <div
-                className="p-3 rounded-lg overflow-hidden"
-                style={{
-                  backgroundColor: "#1A1D20",
-                  borderColor: "#374151",
-                  border: "1px solid #374151",
-                }}
-              >
-                <p
-                  className="text-xs break-all font-mono"
-                  style={{ color: "#9CA3AF" }}
+            <div className="space-y-4 py-2">
+              <div className="text-center space-y-3">
+                <div
+                  className="text-sm font-medium"
+                  style={{ color: "#10B981" }}
                 >
-                  {shareUrl}
-                </p>
+                  ✓ Link created successfully
+                </div>
+                <div
+                  className="p-3 rounded-lg overflow-hidden"
+                  style={{
+                    backgroundColor: "#1A1D20",
+                    borderColor: "#374151",
+                    border: "1px solid #374151",
+                  }}
+                >
+                  <p
+                    className="text-xs break-all font-mono"
+                    style={{ color: "#9CA3AF" }}
+                  >
+                    {shareUrl}
+                  </p>
+                </div>
+                {shareType === "password" && (
+                  <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                    Password protected: <strong>{password}</strong>
+                  </p>
+                )}
               </div>
-              {shareType === "password" && (
-                <p className="text-xs" style={{ color: "#9CA3AF" }}>
-                  Password protected: <strong>{password}</strong>
-                </p>
-              )}
+
+              {/* Share Stats */}
+              <div
+                className="grid grid-cols-2 gap-3 pt-3 border-t"
+                style={{ borderColor: "#374151" }}
+              >
+                <div
+                  className="text-center p-3 rounded-lg"
+                  style={{ backgroundColor: "#1A1D20" }}
+                >
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <EyeIcon
+                      className="w-3.5 h-3.5"
+                      style={{ color: colors.primary }}
+                    />
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                      Views
+                    </p>
+                  </div>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: colors.text }}
+                  >
+                    {fileStats.viewCount}
+                  </p>
+                </div>
+                <div
+                  className="text-center p-3 rounded-lg"
+                  style={{ backgroundColor: "#1A1D20" }}
+                >
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <Download
+                      className="w-3.5 h-3.5"
+                      style={{ color: colors.primary }}
+                    />
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                      Downloads
+                    </p>
+                  </div>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: colors.text }}
+                  >
+                    {fileStats.downloadCount}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

@@ -9,9 +9,19 @@ import {
   EyeOff,
 } from "lucide-react";
 import { db, storage } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
+
+function getOrCreateSessionId(): string {
+  const key = "visitor_session_id";
+  let sessionId = sessionStorage.getItem(key);
+  if (!sessionId) {
+    sessionId = `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionStorage.setItem(key, sessionId);
+  }
+  return sessionId;
+}
 
 interface SharedFile {
   id: string;
@@ -72,6 +82,19 @@ export default function Share() {
         sharePassword: fileData.sharePassword,
       });
 
+      // Track unique view
+      const sessionId = getOrCreateSessionId();
+      if (!fileData.viewedBy || !fileData.viewedBy.includes(sessionId)) {
+        try {
+          await updateDoc(fileRef, {
+            viewedBy: arrayUnion(sessionId),
+            viewCount: (fileData.viewCount || 0) + 1,
+          });
+        } catch (error) {
+          console.error("Error tracking view:", error);
+        }
+      }
+
       // Check if file is password protected
       if (fileData.sharePassword) {
         setIsPasswordProtected(true);
@@ -110,6 +133,22 @@ export default function Share() {
 
       if (!fileData?.storagePath) {
         throw new Error("File information not found");
+      }
+
+      // Track unique download
+      const sessionId = getOrCreateSessionId();
+      if (
+        !fileData.downloadedBy ||
+        !fileData.downloadedBy.includes(sessionId)
+      ) {
+        try {
+          await updateDoc(fileRef, {
+            downloadedBy: arrayUnion(sessionId),
+            downloadCount: (fileData.downloadCount || 0) + 1,
+          });
+        } catch (error) {
+          console.error("Error tracking download:", error);
+        }
       }
 
       const response = await fetch("/api/download", {

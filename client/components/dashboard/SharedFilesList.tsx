@@ -8,10 +8,14 @@ import {
   File,
   Check,
   Globe,
+  Download,
+  Eye,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getThemeColors } from "@/lib/theme-colors";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 interface FileItem {
   id: string;
@@ -21,6 +25,8 @@ interface FileItem {
   shared: boolean;
   shareUrl?: string;
   storagePath?: string;
+  viewCount?: number;
+  downloadCount?: number;
 }
 
 interface SharedFilesListProps {
@@ -58,8 +64,36 @@ export function SharedFilesList({
   const [unshareConfirmOpen, setUnshareConfirmOpen] = useState(false);
   const [unshareFileId, setUnshareFileId] = useState<string | null>(null);
   const [unshareFileName, setUnshareFileName] = useState("");
+  const [fileStats, setFileStats] = useState<
+    Record<string, { viewCount: number; downloadCount: number }>
+  >({});
 
   const sharedFiles = files.filter((file) => file.shared);
+
+  useEffect(() => {
+    loadAllFileStats();
+  }, [files]);
+
+  const loadAllFileStats = async () => {
+    const stats: Record<string, { viewCount: number; downloadCount: number }> =
+      {};
+    for (const file of sharedFiles) {
+      try {
+        const fileRef = doc(db, "files", file.id);
+        const fileSnap = await getDoc(fileRef);
+        if (fileSnap.exists()) {
+          const fileData = fileSnap.data();
+          stats[file.id] = {
+            viewCount: fileData.viewCount || 0,
+            downloadCount: fileData.downloadCount || 0,
+          };
+        }
+      } catch (error) {
+        console.error("Error loading stats for file:", file.id, error);
+      }
+    }
+    setFileStats(stats);
+  };
 
   const handleCopyShare = (fileId: string, shareUrl?: string) => {
     if (shareUrl) {
@@ -200,7 +234,7 @@ export function SharedFilesList({
                         {file.name}
                       </p>
                       <div
-                        className="flex items-center gap-3 mt-0.5 text-xs"
+                        className="flex items-center gap-3 mt-0.5 text-xs flex-wrap"
                         style={{ color: colors.textSecondary }}
                       >
                         <span>{file.size}</span>
@@ -217,6 +251,31 @@ export function SharedFilesList({
                           <Globe className="w-3 h-3" />
                           Public
                         </span>
+                        {fileStats[file.id] && (
+                          <>
+                            <span>•</span>
+                            <span
+                              className="px-1.5 py-0.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                              style={{
+                                backgroundColor: "rgba(100, 116, 139, 0.15)",
+                                color: "#94A3B8",
+                              }}
+                            >
+                              <Eye className="w-3 h-3" />
+                              {fileStats[file.id].viewCount}
+                            </span>
+                            <span
+                              className="px-1.5 py-0.5 rounded-lg text-xs font-medium flex items-center gap-1"
+                              style={{
+                                backgroundColor: "rgba(34, 197, 94, 0.15)",
+                                color: "#22C55E",
+                              }}
+                            >
+                              <Download className="w-3 h-3" />
+                              {fileStats[file.id].downloadCount}
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

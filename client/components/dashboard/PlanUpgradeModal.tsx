@@ -77,7 +77,9 @@ export function PlanUpgradeModal({
       const userPlanRef = doc(db, "userPlans", userId);
       const userPlanDoc = await getDoc(userPlanRef);
 
+      let currentStorageUsed = 0;
       if (userPlanDoc.exists()) {
+        currentStorageUsed = userPlanDoc.data().storageUsed || 0;
         await updateDoc(userPlanRef, {
           type: "premium",
           storageLimit: Infinity, // Unlimited storage
@@ -95,7 +97,7 @@ export function PlanUpgradeModal({
       onUpgradePlan({
         type: "premium",
         storageLimit: Infinity, // Unlimited storage
-        storageUsed: 0,
+        storageUsed: currentStorageUsed,
         validatedAt: new Date().toISOString(),
       });
 
