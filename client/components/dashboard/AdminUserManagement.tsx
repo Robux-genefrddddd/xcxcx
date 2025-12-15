@@ -79,12 +79,21 @@ export function AdminUserManagement({
         let email = "";
         let name = "";
         try {
-          const fileQuery = query(collection(db, "files"));
-          const filesSnapshot = await getDocs(fileQuery);
-          const userFile = filesSnapshot.docs.find(
-            (doc) => doc.data().userId === userId,
+          const filesQuery = query(
+            collection(db, "files"),
+            where("userId", "==", userId),
           );
-          if (userFile) {
+          const filesSnapshot = await getDocs(filesQuery);
+          if (filesSnapshot.docs.length > 0) {
+            const userFile = filesSnapshot.docs[0];
+            email = userFile.data().userEmail || "";
+            name = userFile.data().userName || "";
+          }
+
+          // If email not found from files, try to get from auth metadata if available
+          // Store email in userRoles collection for future queries
+          if (!email && roleData.email) {
+            email = roleData.email;
           }
         } catch (error) {
           console.error(`Error loading user info for ${userId}:`, error);
@@ -92,12 +101,14 @@ export function AdminUserManagement({
 
         userList.push({
           id: userId,
-          email: email || `user_${userId.substring(0, 6)}`,
+          email: email || userId,
           name: name || "Unknown",
           role: roleData.role || "user",
           plan,
           storageUsed,
-          createdAt: new Date().toLocaleDateString(),
+          createdAt: roleData.createdAt
+            ? new Date(roleData.createdAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
         });
       }
 
