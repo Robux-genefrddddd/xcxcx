@@ -71,6 +71,7 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const colors = getThemeColors(theme);
   const storageUsedMB = userPlan ? userPlan.storageUsed / (1024 * 1024) : 0;
+  const isPremium = userPlan && (userPlan.type === "premium" || userPlan.storageLimit === Infinity);
   const storagePercentage =
     userPlan && userPlan.storageLimit !== Infinity
       ? (userPlan.storageUsed / userPlan.storageLimit) * 100
