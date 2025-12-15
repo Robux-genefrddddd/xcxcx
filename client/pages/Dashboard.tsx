@@ -116,30 +116,25 @@ export default function Dashboard() {
           setUserRole("user");
         }
 
-        // Load user plan
-        try {
-          const planRef = doc(db, "userPlans", user.uid);
-          const planDoc = await getDoc(planRef);
-          if (planDoc.exists()) {
-            setUserPlan(planDoc.data() as UserPlan);
-          } else {
-            // Initialize free plan for new users
-            const initialPlan: UserPlan = {
-              type: "free",
-              storageLimit: 1024 * 1024 * 1024 * 1024, // 1 TB
-              storageUsed: 0,
-            };
-            await setDoc(planRef, initialPlan);
-            setUserPlan(initialPlan);
-          }
-        } catch (error) {
-          console.error("Error loading user plan:", error);
+        // Initialize and setup real-time plan listener
+        const planRef = doc(db, "userPlans", user.uid);
+        const planDocSnap = await getDoc(planRef);
+        if (!planDocSnap.exists()) {
+          // Initialize free plan for new users
+          const initialPlan: UserPlan = {
+            type: "free",
+            storageLimit: 1024 * 1024 * 1024 * 1024, // 1 TB
+            storageUsed: 0,
+          };
+          await setDoc(planRef, initialPlan);
+          setUserPlan(initialPlan);
         }
 
         const savedTheme = localStorage.getItem("app-theme") || "dark";
         setTheme(savedTheme);
         setupFilesListener();
         setupUsersListener();
+        setupPlanListener(user.uid);
       } else {
         navigate("/login");
       }
