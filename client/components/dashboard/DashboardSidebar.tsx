@@ -245,7 +245,10 @@ export function DashboardSidebar({
               <p className="text-xs" style={{ color: colors.textSecondary }}>
                 {(() => {
                   const limit = getStorageLimitDisplay();
-                  return `${limit.text}${limit.showLimit ? " limit" : ""}`;
+                  if (!limit.showLimit) {
+                    return limit.text;
+                  }
+                  return `${limit.text} limit`;
                 })()}
               </p>
               <p
