@@ -14,6 +14,8 @@ import { AdminPanel } from "@/components/dashboard/AdminPanel";
 import { auth, db, storage } from "@/lib/firebase";
 import { getThemeColors, getThemeBackgroundImage } from "@/lib/theme-colors";
 import { getUserRole, UserRole } from "@/lib/auth-utils";
+import { useUploadRateLimit } from "@/hooks/use-upload-rate-limit";
+import { toast } from "sonner";
 import {
   collection,
   addDoc,
