@@ -135,6 +135,19 @@ export default function Share() {
         throw new Error("File information not found");
       }
 
+      // Track unique download
+      const sessionId = getOrCreateSessionId();
+      if (!fileData.downloadedBy || !fileData.downloadedBy.includes(sessionId)) {
+        try {
+          await updateDoc(fileRef, {
+            downloadedBy: arrayUnion(sessionId),
+            downloadCount: (fileData.downloadCount || 0) + 1,
+          });
+        } catch (error) {
+          console.error("Error tracking download:", error);
+        }
+      }
+
       const response = await fetch("/api/download", {
         method: "POST",
         headers: {
