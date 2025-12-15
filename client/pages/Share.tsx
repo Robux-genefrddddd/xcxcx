@@ -121,8 +121,12 @@ export default function Share() {
         document.body.removeChild(a);
       }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to download file";
       console.error("Error downloading file:", err);
-      alert("Failed to download file");
+      toast({
+        title: "Download Failed",
+        description: errorMessage,
+      });
     } finally {
       setDownloading(false);
     }
