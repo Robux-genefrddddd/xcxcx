@@ -37,26 +37,26 @@ export function AdminPanel({ theme, userRole, userId }: AdminPanelProps) {
   }> = [
     {
       id: "keys",
-      label: "Premium Keys",
-      icon: <Key className="w-5 h-5" />,
+      label: "Keys",
+      icon: <Key className="w-4 h-4" />,
       visible: canManageKeys(userRole),
     },
     {
       id: "users",
       label: "Users",
-      icon: <Users className="w-5 h-5" />,
+      icon: <Users className="w-4 h-4" />,
       visible: canManageUsers(userRole),
     },
     {
       id: "maintenance",
       label: "Maintenance",
-      icon: <AlertCircle className="w-5 h-5" />,
+      icon: <AlertCircle className="w-4 h-4" />,
       visible: true,
     },
     {
       id: "stats",
-      label: "Statistics",
-      icon: <BarChart3 className="w-5 h-5" />,
+      label: "Stats",
+      icon: <BarChart3 className="w-4 h-4" />,
       visible: canViewStats(userRole),
     },
   ];
@@ -64,44 +64,55 @@ export function AdminPanel({ theme, userRole, userId }: AdminPanelProps) {
   const visibleTabs = adminTabs.filter((tab) => tab.visible);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="border-b" style={{ borderColor: colors.border }}>
+      <div>
         <h2
-          className="text-lg font-semibold pb-3"
+          className="text-xl font-bold"
           style={{ color: colors.text }}
         >
-          Admin
+          Administration
         </h2>
+        <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
+          Manage your system settings and users
+        </p>
       </div>
 
-      {/* Navigation Tabs */}
+      {/* Minimal Tab Navigation */}
       <div
-        className="flex gap-2 flex-wrap border-b"
-        style={{ borderColor: colors.border }}
+        className="flex gap-1 p-1 rounded-lg w-fit"
+        style={{ backgroundColor: colors.sidebar }}
       >
         {visibleTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="flex items-center gap-2 px-3 py-2 text-sm transition-colors border-b-2 -mb-1"
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-all font-medium"
             style={{
-              backgroundColor: "transparent",
-              borderBottomColor:
-                activeTab === tab.id ? colors.primary : "transparent",
-              color: activeTab === tab.id ? colors.text : colors.textSecondary,
+              backgroundColor:
+                activeTab === tab.id
+                  ? colors.card
+                  : "transparent",
+              color:
+                activeTab === tab.id
+                  ? colors.text
+                  : colors.textSecondary,
             }}
           >
             {tab.icon}
-            <span className="hidden sm:inline text-xs font-medium">
-              {tab.label}
-            </span>
+            <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>
 
       {/* Tab Content */}
-      <div className="mt-4">
+      <div
+        className="p-6 rounded-lg border"
+        style={{
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+        }}
+      >
         {activeTab === "keys" && canManageKeys(userRole) && (
           <AdminKeyManagement
             theme={theme}
