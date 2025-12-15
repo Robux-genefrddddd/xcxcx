@@ -108,18 +108,55 @@ export default function Share() {
       const fileSnap = await getDoc(fileRef);
       const fileData = fileSnap.data();
 
-      if (fileData?.storagePath) {
-        const storageRef = ref(storage, fileData.storagePath);
-        const downloadUrl = await getDownloadURL(storageRef);
-
-        const a = document.createElement("a");
-        a.href = downloadUrl;
-        a.download = file.name;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+      if (!fileData?.storagePath) {
+        throw new Error("File information not found");
       }
+
+      const response = await fetch("/api/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          storagePath: fileData.storagePath,
+          fileName: file.name,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = "Failed to download file";
+        const contentType = response.headers.get("content-type");
+
+        try {
+          if (contentType?.includes("application/json")) {
+            const error = await response.json();
+            errorMessage = error.error || errorMessage;
+          } else {
+            const text = await response.text();
+            errorMessage = text.slice(0, 100) || errorMessage;
+          }
+        } catch {
+          errorMessage = `Server error (${response.status})`;
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = file.name || "download";
+      link.style.display = "none";
+
+      document.body.appendChild(link);
+      link.click();
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to download file";
