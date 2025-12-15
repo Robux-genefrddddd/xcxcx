@@ -60,7 +60,7 @@ export function FilesList({
 
   const handleDownload = async (file: FileItem) => {
     if (!file.storagePath) {
-      alert("File storage path not found. Please try again.");
+      console.error("File storage path not found for", file.name);
       return;
     }
 
