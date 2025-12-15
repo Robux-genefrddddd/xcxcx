@@ -305,6 +305,8 @@ export default function Dashboard() {
       const dbPromises = uploadedFiles.map((uploaded) =>
         addDoc(collection(db, "files"), {
           userId: auth.currentUser.uid,
+          userEmail: userEmail,
+          userName: userName,
           name: uploaded.file.name,
           size: uploaded.fileSize,
           uploadedAt: new Date().toISOString(),
