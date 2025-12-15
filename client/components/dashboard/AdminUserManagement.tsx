@@ -42,6 +42,13 @@ export function AdminUserManagement({
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsers = users.filter(
+    (user) =>
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   useEffect(() => {
     loadUsers();
