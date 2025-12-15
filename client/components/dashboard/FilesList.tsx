@@ -292,23 +292,36 @@ export function FilesList({
           <div className="divide-y" style={{ borderColor: colors.border }}>
             {files.map((file) => {
               const { icon: FileIcon, color } = getFileIcon(file.name);
+              const isSelected = selectedFileIds.has(file.id);
 
               return (
                 <div
                   key={file.id}
-                  className="px-6 py-3 flex items-center justify-between group hover:bg-opacity-50 transition-all duration-200 hover:scale-[1.02] origin-left cursor-pointer"
+                  className="px-6 py-3 flex items-center justify-between group hover:bg-opacity-50 transition-all duration-200 hover:scale-[1.02] origin-left"
                   style={{
-                    backgroundColor: colors.card,
+                    backgroundColor: isSelected ? colors.accentLight : colors.card,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.sidebar;
+                    if (!isSelected) {
+                      e.currentTarget.style.backgroundColor = colors.sidebar;
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = colors.card;
+                    e.currentTarget.style.backgroundColor = isSelected
+                      ? colors.accentLight
+                      : colors.card;
                   }}
                 >
-                  {/* File Icon & Name */}
+                  {/* Checkbox & File Icon & Name */}
                   <div className="flex-1 min-w-0 flex items-center gap-3">
+                    {isPremium && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleFileSelection(file.id)}
+                        className="w-4 h-4 cursor-pointer flex-shrink-0"
+                      />
+                    )}
                     <div
                       className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{
