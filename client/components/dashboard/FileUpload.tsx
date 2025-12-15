@@ -38,14 +38,20 @@ export function FileUpload({
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-      onFileSelected(files[0]);
+      const selectedFiles = isPremium
+        ? Array.from(files)
+        : [files[0]];
+      onFileSelected(selectedFiles);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      onFileSelected(files[0]);
+      const selectedFiles = isPremium
+        ? Array.from(files)
+        : [files[0]];
+      onFileSelected(selectedFiles);
     }
   };
 
