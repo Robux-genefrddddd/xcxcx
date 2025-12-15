@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, Shield, Award, Zap, User, Search } from "lucide-react";
+import { Trash2, Search, Mail, Calendar } from "lucide-react";
 import { getThemeColors } from "@/lib/theme-colors";
 import {
   collection,
@@ -9,6 +9,7 @@ import {
   updateDoc,
   getDoc,
   query,
+  where,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import {
@@ -76,28 +77,38 @@ export function AdminUserManagement({
           console.error(`Error loading plan for ${userId}:`, error);
         }
 
-        let email = "";
-        let name = "";
-        try {
-          const fileQuery = query(collection(db, "files"));
-          const filesSnapshot = await getDocs(fileQuery);
-          const userFile = filesSnapshot.docs.find(
-            (doc) => doc.data().userId === userId,
-          );
-          if (userFile) {
+        // Get email from userRoles (primary source)
+        let email = roleData.email || "";
+        let name = roleData.displayName || "";
+
+        // If email not found, try to get from files as fallback
+        if (!email) {
+          try {
+            const filesQuery = query(
+              collection(db, "files"),
+              where("userId", "==", userId),
+            );
+            const filesSnapshot = await getDocs(filesQuery);
+            if (filesSnapshot.docs.length > 0) {
+              const userFile = filesSnapshot.docs[0];
+              email = userFile.data().userEmail || "";
+              if (!name) name = userFile.data().userName || "";
+            }
+          } catch (error) {
+            console.error(`Error loading user info for ${userId}:`, error);
           }
-        } catch (error) {
-          console.error(`Error loading user info for ${userId}:`, error);
         }
 
         userList.push({
           id: userId,
-          email: email || `user_${userId.substring(0, 6)}`,
+          email: email || userId,
           name: name || "Unknown",
           role: roleData.role || "user",
           plan,
           storageUsed,
-          createdAt: new Date().toLocaleDateString(),
+          createdAt: roleData.createdAt
+            ? new Date(roleData.createdAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
         });
       }
 
@@ -147,44 +158,36 @@ export function AdminUserManagement({
   };
 
   const formatStorage = (bytes: number) => {
+    if (bytes === 0) return "0 MB";
     const mb = bytes / (1024 * 1024);
-    return mb.toFixed(1) + "MB";
+    if (mb > 1024) return `${(mb / 1024).toFixed(1)} GB`;
+    return `${mb.toFixed(0)} MB`;
   };
 
-  const getRoleInfo = (role: UserRole) => {
-    const roleMap = {
-      founder: { label: "Founder", color: "#22C55E" },
-      admin: { label: "Admin", color: colors.primary },
-      user: { label: "User", color: colors.textSecondary },
-    };
-    return roleMap[role] || roleMap.user;
+  const getPlanBadgeColor = (plan: string) => {
+    switch (plan) {
+      case "lifetime":
+        return { bg: "rgba(168, 85, 247, 0.15)", text: "#A855F7" };
+      case "premium":
+        return { bg: "rgba(34, 197, 94, 0.15)", text: "#22C55E" };
+      default:
+        return { bg: "rgba(59, 130, 246, 0.15)", text: "#3B82F6" };
+    }
   };
 
-  const getPlanInfo = (plan: string) => {
-    const planMap = {
-      lifetime: {
-        label: "Lifetime",
-        color: "#A855F7",
-        icon: Award,
-      },
-      premium: { label: "Premium", color: "#22C55E", icon: Zap },
-      free: { label: "Free", color: colors.primary, icon: User },
-    };
-    return planMap[plan as keyof typeof planMap] || planMap.free;
+  const getRoleBadgeColor = (role: UserRole) => {
+    switch (role) {
+      case "founder":
+        return { bg: "rgba(34, 197, 94, 0.15)", text: "#22C55E" };
+      case "admin":
+        return { bg: "rgba(59, 130, 246, 0.15)", text: "#3B82F6" };
+      default:
+        return { bg: "rgba(156, 163, 175, 0.15)", text: "#9CA3AF" };
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h3 className="text-xl font-bold" style={{ color: colors.text }}>
-          User Management
-        </h3>
-        <p className="text-sm mt-1" style={{ color: colors.textSecondary }}>
-          Manage user roles, plans, and permissions
-        </p>
-      </div>
-
       {/* Search Bar */}
       {users.length > 0 && (
         <div className="relative">
@@ -194,10 +197,10 @@ export function AdminUserManagement({
           />
           <input
             type="text"
-            placeholder="Search users by email..."
+            placeholder="Search by email or name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border text-sm"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border text-sm"
             style={{
               backgroundColor: colors.card,
               borderColor: colors.border,
@@ -207,9 +210,9 @@ export function AdminUserManagement({
         </div>
       )}
 
-      {/* Users Grid */}
+      {/* Users List */}
       {loading ? (
-        <div className="flex justify-center items-center py-12">
+        <div className="flex justify-center items-center py-20">
           <div
             className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-b-transparent"
             style={{ borderColor: colors.accent }}
@@ -217,7 +220,7 @@ export function AdminUserManagement({
         </div>
       ) : filteredUsers.length === 0 ? (
         <div
-          className="p-12 rounded-xl border text-center"
+          className="p-12 rounded-lg border text-center"
           style={{
             backgroundColor: colors.card,
             borderColor: colors.border,
@@ -228,254 +231,203 @@ export function AdminUserManagement({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-3">
           {filteredUsers.map((user) => {
-            const roleInfo = getRoleInfo(user.role);
-            const planInfo = getPlanInfo(user.plan);
+            const planColors = getPlanBadgeColor(user.plan);
+            const roleColors = getRoleBadgeColor(user.role);
             const isCurrentUser = user.id === currentUserId;
 
             return (
               <div
                 key={user.id}
-                className="p-5 rounded-xl border transition-all duration-300 hover:shadow-lg transform hover:scale-105"
+                className="p-4 rounded-lg border transition-all"
                 style={{
                   backgroundColor: colors.card,
                   borderColor: colors.border,
-                  opacity: isCurrentUser ? 0.8 : 1,
+                  opacity: isCurrentUser ? 0.7 : 1,
                 }}
               >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                      style={{ backgroundColor: colors.sidebar }}
-                    >
-                      {user.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-4">
+                  {/* User Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
                       <div
-                        className="font-semibold truncate"
-                        style={{ color: colors.text }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium flex-shrink-0"
+                        style={{
+                          backgroundColor: colors.sidebar,
+                          color: colors.text,
+                        }}
                       >
-                        {user.email}
+                        {user.email.charAt(0).toUpperCase()}
                       </div>
-                      {isCurrentUser && (
-                        <div
-                          className="text-xs mt-1 px-2 py-0.5 rounded inline-block"
-                          style={{
-                            backgroundColor: colors.accentLight,
-                            color: colors.accent,
-                          }}
+                      <div className="min-w-0">
+                        <p
+                          className="text-sm font-medium truncate"
+                          style={{ color: colors.text }}
                         >
-                          You
-                        </div>
-                      )}
+                          {user.email}
+                        </p>
+                        {isCurrentUser && (
+                          <p
+                            className="text-xs"
+                            style={{ color: colors.primary }}
+                          >
+                            (You)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Badges and Info */}
+                    <div className="flex items-center flex-wrap gap-2 ml-11">
+                      {/* Role Badge */}
+                      <span
+                        className="text-xs px-2 py-1 rounded-full font-medium"
+                        style={{
+                          backgroundColor: roleColors.bg,
+                          color: roleColors.text,
+                        }}
+                      >
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+
+                      {/* Plan Badge */}
+                      <span
+                        className="text-xs px-2 py-1 rounded-full font-medium"
+                        style={{
+                          backgroundColor: planColors.bg,
+                          color: planColors.text,
+                        }}
+                      >
+                        {user.plan.charAt(0).toUpperCase() + user.plan.slice(1)}
+                      </span>
+
+                      {/* Storage Info */}
+                      <span
+                        className="text-xs px-2 py-1 rounded-full"
+                        style={{
+                          backgroundColor: "transparent",
+                          color: colors.textSecondary,
+                        }}
+                      >
+                        {formatStorage(user.storageUsed)}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                {/* Role Badge */}
-                <div className="flex items-center gap-2 mb-4 flex-wrap">
-                  <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium"
-                    style={{
-                      backgroundColor:
-                        roleInfo.label === "Founder"
-                          ? "rgba(34, 197, 94, 0.15)"
-                          : roleInfo.label === "Admin"
-                            ? "rgba(59, 130, 246, 0.15)"
-                            : "rgba(156, 163, 175, 0.15)",
-                      color: roleInfo.color,
-                    }}
-                  >
-                    <span>{roleInfo.label}</span>
-                  </div>
-
-                  {/* Plan Badge */}
-                  <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium"
-                    style={{
-                      backgroundColor:
-                        user.plan === "lifetime"
-                          ? "rgba(168, 85, 247, 0.15)"
-                          : user.plan === "premium"
-                            ? "rgba(34, 197, 94, 0.15)"
-                            : "rgba(59, 130, 246, 0.15)",
-                      color: planInfo.color,
-                    }}
-                  >
-                    <span>{planInfo.label}</span>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div
-                  className="p-3 rounded-lg space-y-2 mb-4"
-                  style={{ backgroundColor: colors.sidebar }}
-                >
-                  <div className="flex justify-between items-center text-xs">
-                    <span style={{ color: colors.textSecondary }}>
-                      Storage Used
-                    </span>
-                    <span
-                      style={{ color: colors.text }}
-                      className="font-semibold"
-                    >
-                      {formatStorage(user.storageUsed)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs">
-                    <span style={{ color: colors.textSecondary }}>Joined</span>
-                    <span
-                      style={{ color: colors.text }}
-                      className="font-semibold"
-                    >
-                      {user.createdAt}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Role Selector */}
-                {canManageUsers(userRole) && !isCurrentUser && (
-                  <div className="mb-4">
-                    <label
-                      className="text-xs block mb-2 uppercase tracking-wide"
-                      style={{ color: colors.textSecondary }}
-                    >
-                      Change Role
-                    </label>
-                    <select
-                      value={user.role}
-                      onChange={(e) =>
-                        updateUserRole(user.id, e.target.value as UserRole)
-                      }
-                      className="w-full px-3 py-2 rounded-lg text-sm border focus:outline-none transition-all"
-                      style={{
-                        backgroundColor: colors.sidebar,
-                        borderColor: colors.border,
-                        color: colors.text,
-                      }}
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                      <option value="founder">Founder</option>
-                    </select>
-                  </div>
-                )}
-
-                {/* Actions */}
-                {canManageUsers(userRole) &&
-                  canPerformCriticalActions(userRole) &&
-                  !isCurrentUser && (
-                    <div>
-                      {deleteConfirm === user.id ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => deleteUser(user.id)}
-                            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105"
-                            style={{
-                              backgroundColor: "rgba(239, 68, 68, 0.2)",
-                              color: "#EF4444",
-                            }}
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(null)}
-                            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all"
-                            style={{
-                              backgroundColor: colors.sidebar,
-                              color: colors.textSecondary,
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setDeleteConfirm(user.id)}
-                          className="w-full px-3 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 opacity-70 hover:opacity-100"
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {canManageUsers(userRole) && !isCurrentUser && (
+                      <>
+                        <select
+                          value={user.role}
+                          onChange={(e) =>
+                            updateUserRole(user.id, e.target.value as UserRole)
+                          }
+                          className="text-xs px-2 py-1 rounded border"
                           style={{
-                            backgroundColor: "rgba(239, 68, 68, 0.1)",
-                            color: "#EF4444",
+                            backgroundColor: colors.sidebar,
+                            borderColor: colors.border,
+                            color: colors.text,
                           }}
                         >
-                          <Trash2 className="w-4 h-4" />
-                          Delete User
-                        </button>
-                      )}
-                    </div>
-                  )}
+                          <option value="user">User</option>
+                          <option value="admin">Admin</option>
+                          <option value="founder">Founder</option>
+                        </select>
+
+                        {canPerformCriticalActions(userRole) &&
+                          (deleteConfirm === user.id ? (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => deleteUser(user.id)}
+                                className="text-xs px-2 py-1 rounded transition-all"
+                                style={{
+                                  backgroundColor: "rgba(239, 68, 68, 0.2)",
+                                  color: "#EF4444",
+                                }}
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(null)}
+                                className="text-xs px-2 py-1 rounded"
+                                style={{
+                                  backgroundColor: colors.sidebar,
+                                  color: colors.textSecondary,
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setDeleteConfirm(user.id)}
+                              className="p-1 rounded transition-opacity opacity-60 hover:opacity-100"
+                              style={{
+                                color: "#EF4444",
+                              }}
+                              title="Delete user"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          ))}
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Summary Stats */}
+      {users.length > 0 && (
         <div
-          className="p-6 rounded-xl border transition-all hover:shadow-lg"
+          className="p-4 rounded-lg border"
           style={{
             backgroundColor: colors.card,
             borderColor: colors.border,
           }}
         >
-          <p
-            style={{ color: colors.textSecondary }}
-            className="text-xs uppercase tracking-wide"
-          >
-            Total Users
-          </p>
-          <p
-            className="text-4xl font-bold mt-3"
-            style={{ color: colors.accent }}
-          >
-            {users.length}
-          </p>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-xs" style={{ color: colors.textSecondary }}>
+                Total Users
+              </p>
+              <p
+                className="text-xl font-bold mt-1"
+                style={{ color: colors.accent }}
+              >
+                {users.length}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: colors.textSecondary }}>
+                Premium
+              </p>
+              <p
+                className="text-xl font-bold mt-1"
+                style={{ color: colors.primary }}
+              >
+                {users.filter((u) => u.plan !== "free").length}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: colors.textSecondary }}>
+                Admins & Founders
+              </p>
+              <p
+                className="text-xl font-bold mt-1"
+                style={{ color: "#22C55E" }}
+              >
+                {users.filter((u) => u.role !== "user").length}
+              </p>
+            </div>
+          </div>
         </div>
-        <div
-          className="p-6 rounded-xl border transition-all hover:shadow-lg"
-          style={{
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-          }}
-        >
-          <p
-            style={{ color: colors.textSecondary }}
-            className="text-xs uppercase tracking-wide"
-          >
-            Admins & Founders
-          </p>
-          <p
-            className="text-4xl font-bold mt-3"
-            style={{ color: colors.primary }}
-          >
-            {
-              users.filter((u) => u.role === "admin" || u.role === "founder")
-                .length
-            }
-          </p>
-        </div>
-        <div
-          className="p-6 rounded-xl border transition-all hover:shadow-lg"
-          style={{
-            backgroundColor: colors.card,
-            borderColor: colors.border,
-          }}
-        >
-          <p
-            style={{ color: colors.textSecondary }}
-            className="text-xs uppercase tracking-wide"
-          >
-            Premium Users
-          </p>
-          <p className="text-4xl font-bold mt-3" style={{ color: "#22C55E" }}>
-            {users.filter((u) => u.plan !== "free").length}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

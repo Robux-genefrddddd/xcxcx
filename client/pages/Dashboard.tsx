@@ -85,6 +85,7 @@ export default function Dashboard() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const filesUnsubscribeRef = useRef<(() => void) | null>(null);
   const usersUnsubscribeRef = useRef<(() => void) | null>(null);
+  const planUnsubscribeRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -93,39 +94,47 @@ export default function Dashboard() {
         setUserName(user.displayName || "User");
         setUserEmail(user.email || "");
 
-        // Load user role
+        // Load user role and store email for admin panel
         try {
           const role = await getUserRole(user.uid);
           setUserRole(role);
+
+          // Store email in userRoles collection for admin panel display
+          const userRoleRef = doc(db, "userRoles", user.uid);
+          const userRoleSnap = await getDoc(userRoleRef);
+          if (userRoleSnap.exists()) {
+            const roleData = userRoleSnap.data();
+            if (!roleData.email || roleData.email !== user.email) {
+              await updateDoc(userRoleRef, {
+                email: user.email,
+                displayName: user.displayName,
+              });
+            }
+          }
         } catch (error) {
           console.error("Error loading user role:", error);
           setUserRole("user");
         }
 
-        // Load user plan
-        try {
-          const planRef = doc(db, "userPlans", user.uid);
-          const planDoc = await getDoc(planRef);
-          if (planDoc.exists()) {
-            setUserPlan(planDoc.data() as UserPlan);
-          } else {
-            // Initialize free plan for new users
-            const initialPlan: UserPlan = {
-              type: "free",
-              storageLimit: 1024 * 1024 * 1024 * 1024, // 1 TB
-              storageUsed: 0,
-            };
-            await setDoc(planRef, initialPlan);
-            setUserPlan(initialPlan);
-          }
-        } catch (error) {
-          console.error("Error loading user plan:", error);
+        // Initialize and setup real-time plan listener
+        const planRef = doc(db, "userPlans", user.uid);
+        const planDocSnap = await getDoc(planRef);
+        if (!planDocSnap.exists()) {
+          // Initialize free plan for new users
+          const initialPlan: UserPlan = {
+            type: "free",
+            storageLimit: 1024 * 1024 * 1024 * 1024, // 1 TB
+            storageUsed: 0,
+          };
+          await setDoc(planRef, initialPlan);
+          setUserPlan(initialPlan);
         }
 
         const savedTheme = localStorage.getItem("app-theme") || "dark";
         setTheme(savedTheme);
         setupFilesListener();
         setupUsersListener();
+        setupPlanListener(user.uid);
       } else {
         navigate("/login");
       }
@@ -140,6 +149,9 @@ export default function Dashboard() {
       }
       if (usersUnsubscribeRef.current) {
         usersUnsubscribeRef.current();
+      }
+      if (planUnsubscribeRef.current) {
+        planUnsubscribeRef.current();
       }
     };
   }, [navigate]);
@@ -220,7 +232,9 @@ export default function Dashboard() {
       return;
 
     // Determine max file size based on plan
-    const maxFileSize = userPlan.type === "premium" ? 800 : 300;
+    const isPremium =
+      userPlan.type === "premium" || userPlan.storageLimit === Infinity;
+    const maxFileSize = isPremium ? 800 : 300;
     const maxFileSizeBytes = maxFileSize * 1024 * 1024;
 
     // Reset upload state
@@ -305,6 +319,8 @@ export default function Dashboard() {
       const dbPromises = uploadedFiles.map((uploaded) =>
         addDoc(collection(db, "files"), {
           userId: auth.currentUser.uid,
+          userEmail: userEmail,
+          userName: userName,
           name: uploaded.file.name,
           size: uploaded.fileSize,
           uploadedAt: new Date().toISOString(),
@@ -423,6 +439,33 @@ export default function Dashboard() {
     usersUnsubscribeRef.current = unsubscribe;
   };
 
+  // ============= PLAN LISTENER =============
+  const setupPlanListener = (userId: string) => {
+    if (!userId) return;
+
+    // Unsubscribe from previous listener if exists
+    if (planUnsubscribeRef.current) {
+      planUnsubscribeRef.current();
+    }
+
+    const planRef = doc(db, "userPlans", userId);
+
+    // Set up real-time listener for plan changes
+    const unsubscribe = onSnapshot(
+      planRef,
+      (snapshot) => {
+        if (snapshot.exists()) {
+          setUserPlan(snapshot.data() as UserPlan);
+        }
+      },
+      (error) => {
+        console.error("Error listening to plan changes:", error);
+      },
+    );
+
+    planUnsubscribeRef.current = unsubscribe;
+  };
+
   const handleAddUser = async (
     name: string,
     email: string,
@@ -501,6 +544,8 @@ export default function Dashboard() {
   }
 
   const themeColors = getThemeColors(theme);
+  const isPremiumUser =
+    userPlan.type === "premium" || userPlan.storageLimit === Infinity;
 
   return (
     <div
@@ -572,8 +617,8 @@ export default function Dashboard() {
                   onFileSelected={handleFileUpload}
                   uploading={uploading}
                   theme={theme}
-                  maxFileSize={userPlan?.type === "premium" ? 800 : 300}
-                  isPremium={userPlan?.type === "premium"}
+                  maxFileSize={isPremiumUser ? 800 : 300}
+                  isPremium={isPremiumUser}
                 />
                 <FilesList
                   files={files}
@@ -582,7 +627,7 @@ export default function Dashboard() {
                   onShare={handleShareFile}
                   onDelete={handleDeleteFile}
                   onCopyShareLink={() => {}}
-                  isPremium={userPlan?.type === "premium"}
+                  isPremium={isPremiumUser}
                 />
               </div>
             )}

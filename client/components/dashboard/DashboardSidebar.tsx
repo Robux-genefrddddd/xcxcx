@@ -71,18 +71,21 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const colors = getThemeColors(theme);
   const storageUsedMB = userPlan ? userPlan.storageUsed / (1024 * 1024) : 0;
+  const isPremium =
+    userPlan &&
+    (userPlan.type === "premium" || userPlan.storageLimit === Infinity);
   const storagePercentage =
     userPlan && userPlan.storageLimit !== Infinity
       ? (userPlan.storageUsed / userPlan.storageLimit) * 100
       : 0;
 
   const getStorageLimitDisplay = () => {
-    if (!userPlan) return { text: "1 T", showLimit: true };
-    if (userPlan.type === "premium")
+    if (!userPlan) return { text: "1 TB", showLimit: true };
+    if (userPlan.storageLimit === Infinity || userPlan.type === "premium")
       return { text: "Unlimited", showLimit: false };
     const limitTB = userPlan.storageLimit / (1024 * 1024 * 1024 * 1024);
     if (limitTB >= 1)
-      return { text: `${limitTB.toFixed(0)} T`, showLimit: true };
+      return { text: `${limitTB.toFixed(0)} TB`, showLimit: true };
     const limitGB = userPlan.storageLimit / (1024 * 1024 * 1024);
     if (limitGB >= 1)
       return { text: `${limitGB.toFixed(0)} GB`, showLimit: true };
@@ -250,21 +253,19 @@ export function DashboardSidebar({
               <p
                 className="text-xs font-medium px-2 py-0.5 rounded"
                 style={{
-                  backgroundColor:
-                    userPlan.type === "premium"
-                      ? "rgba(34, 197, 94, 0.15)"
-                      : "rgba(100, 116, 139, 0.15)",
-                  color:
-                    userPlan.type === "premium" ? "#22C55E" : colors.primary,
+                  backgroundColor: isPremium
+                    ? "rgba(34, 197, 94, 0.15)"
+                    : "rgba(100, 116, 139, 0.15)",
+                  color: isPremium ? "#22C55E" : colors.primary,
                 }}
               >
-                {userPlan.type === "premium" ? "Premium" : "Free"}
+                {isPremium ? "Premium" : "Free"}
               </p>
             </div>
           </div>
         ) : null}
 
-        {userPlan && userPlan.type === "free" && onUpgradeClick && (
+        {userPlan && !isPremium && onUpgradeClick && (
           <button
             onClick={onUpgradeClick}
             className="w-full px-3 py-2 text-xs font-semibold transition-colors border rounded-lg"

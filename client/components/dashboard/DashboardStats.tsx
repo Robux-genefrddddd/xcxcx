@@ -46,8 +46,14 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
   const totalFiles = files.length;
   const sharedFiles = files.filter((f) => f.shared).length;
   const storageUsedMB = plan.storageUsed / (1024 * 1024);
-  const storageLimitMB = plan.storageLimit / (1024 * 1024);
-  const storagePercent = (plan.storageUsed / plan.storageLimit) * 100;
+  const storageLimitMB =
+    plan.storageLimit === Infinity
+      ? "Unlimited"
+      : plan.storageLimit / (1024 * 1024);
+  const storagePercent =
+    plan.storageLimit === Infinity
+      ? 0
+      : (plan.storageUsed / plan.storageLimit) * 100;
 
   const fileTypeMap = {
     Documents: 0,
@@ -104,7 +110,9 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
               </span>
             </p>
             <p className="text-xs" style={{ color: colors.textSecondary }}>
-              {storageLimitMB.toFixed(0)} MB limit
+              {typeof storageLimitMB === "number"
+                ? `${storageLimitMB.toFixed(0)} MB limit`
+                : "Unlimited storage"}
             </p>
           </div>
           <div
@@ -126,7 +134,7 @@ export function DashboardStats({ files, theme, plan }: DashboardStatsProps) {
               }}
             />
           </div>
-          {plan.type === "premium" && (
+          {(plan.type === "premium" || plan.storageLimit === Infinity) && (
             <p
               style={{ color: colors.primary }}
               className="text-xs mt-2 font-medium"
